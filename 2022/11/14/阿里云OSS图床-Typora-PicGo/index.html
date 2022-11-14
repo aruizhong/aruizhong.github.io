@@ -20,21 +20,31 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="git 工作流程工作区（写代码）&#x3D;&#x3D;git add  &#x3D;&#x3D;&gt;  暂存区（临时存储）&#x3D;&#x3D; git commit &#x3D;&#x3D;&gt;  本地仓库（历史版本）&#x3D;&#x3D; git push&#x3D;&#x3D;&gt; 远程库 git常用命令   说明 命令    查看帮助 git 操作 -help 或者 gi">
+  <meta name="description" content="PicGO下载PicGoPicGo: 一个用于快速上传图片并获取图片 URL 链接的工具 PicGo下载地址 PicGo中阿里云OSS配置 Typora中配置PicGo 打开偏好设置 设置 PicGo.exe 的安装路径   阿里云OSS购买存储包 创建Bucket 名称和地域自己自定义 读写权限公共读 ，其他默认即可   配置阿里云子账户 给Bucket授予子用户读写权限 分别填上PicGo中的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="git">
-<meta property="og:url" content="http://example.com/2022/11/06/git/index.html">
+<meta property="og:title" content="阿里云OSS图床+Typora+PicGo">
+<meta property="og:url" content="http://example.com/2022/11/14/%E9%98%BF%E9%87%8C%E4%BA%91OSS%E5%9B%BE%E5%BA%8A-Typora-PicGo/index.html">
 <meta property="og:site_name" content="阿睿的博客">
-<meta property="og:description" content="git 工作流程工作区（写代码）&#x3D;&#x3D;git add  &#x3D;&#x3D;&gt;  暂存区（临时存储）&#x3D;&#x3D; git commit &#x3D;&#x3D;&gt;  本地仓库（历史版本）&#x3D;&#x3D; git push&#x3D;&#x3D;&gt; 远程库 git常用命令   说明 命令    查看帮助 git 操作 -help 或者 gi">
+<meta property="og:description" content="PicGO下载PicGoPicGo: 一个用于快速上传图片并获取图片 URL 链接的工具 PicGo下载地址 PicGo中阿里云OSS配置 Typora中配置PicGo 打开偏好设置 设置 PicGo.exe 的安装路径   阿里云OSS购买存储包 创建Bucket 名称和地域自己自定义 读写权限公共读 ，其他默认即可   配置阿里云子账户 给Bucket授予子用户读写权限 分别填上PicGo中的">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-11-06T11:27:08.000Z">
-<meta property="article:modified_time" content="2022-11-14T15:42:58.885Z">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225333167.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114224959787.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225735353.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114230124215.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225917643.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114230613420.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225333167.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114231134305.png">
+<meta property="article:published_time" content="2022-11-14T15:26:45.000Z">
+<meta property="article:modified_time" content="2022-11-14T15:43:27.912Z">
 <meta property="article:author" content="arui zhong">
-<meta property="article:tag" content="git">
-<meta property="article:tag" content="工具">
+<meta property="article:tag" content="博客">
+<meta property="article:tag" content="图床">
+<meta property="article:tag" content="PicGo">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225333167.png">
 
-<link rel="canonical" href="http://example.com/2022/11/06/git/">
+<link rel="canonical" href="http://example.com/2022/11/14/%E9%98%BF%E9%87%8C%E4%BA%91OSS%E5%9B%BE%E5%BA%8A-Typora-PicGo/">
 
 
 <script id="page-configurations">
@@ -47,7 +57,7 @@
   };
 </script>
 
-  <title>git | 阿睿的博客</title>
+  <title>阿里云OSS图床+Typora+PicGo | 阿睿的博客</title>
   
 
 
@@ -168,7 +178,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/06/git/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/14/%E9%98%BF%E9%87%8C%E4%BA%91OSS%E5%9B%BE%E5%BA%8A-Typora-PicGo/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -181,7 +191,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          git
+          阿里云OSS图床+Typora+PicGo
         </h1>
 
         <div class="post-meta">
@@ -190,16 +200,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2022-11-06 19:27:08" itemprop="dateCreated datePublished" datetime="2022-11-06T19:27:08+08:00">2022-11-06</time>
+              <time title="创建时间：2022-11-14 23:26:45 / 修改时间：23:43:27" itemprop="dateCreated datePublished" datetime="2022-11-14T23:26:45+08:00">2022-11-14</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-11-14 23:42:58" itemprop="dateModified" datetime="2022-11-14T23:42:58+08:00">2022-11-14</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -210,7 +214,7 @@
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%B7%A5%E5%85%B7/git/" itemprop="url" rel="index"><span itemprop="name">git</span></a>
+                  <a href="/categories/%E5%B7%A5%E5%85%B7/%E5%8D%9A%E5%AE%A2/" itemprop="url" rel="index"><span itemprop="name">博客</span></a>
                 </span>
             </span>
 
@@ -225,120 +229,30 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="git-工作流程"><a href="#git-工作流程" class="headerlink" title="git 工作流程"></a>git 工作流程</h1><p><strong>工作区</strong>（写代码）&#x3D;&#x3D;<code>git add </code> &#x3D;&#x3D;&gt; </p>
-<p><strong>暂存区</strong>（临时存储）&#x3D;&#x3D; <code>git commit</code> &#x3D;&#x3D;&gt; </p>
-<p><strong>本地仓库</strong>（历史版本）&#x3D;&#x3D; <code>git push</code>&#x3D;&#x3D;&gt; <strong>远程库</strong></p>
-<h1 id="git常用命令"><a href="#git常用命令" class="headerlink" title="git常用命令"></a>git常用命令</h1><table>
-<thead>
-<tr>
-<th>说明</th>
-<th>命令</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>查看帮助</td>
-<td><code>git 操作 -help</code> 或者 <code>git 操作 --help</code></td>
-</tr>
-<tr>
-<td>设置用户签名</td>
-<td><code>git config --global[local] user.name xxx</code><br /><code>git config --global[local] user.email xxx</code> <br />global 是全局签名，local是某个仓库签名<br /><code>git config user.name</code> （查看签名</td>
-</tr>
-<tr>
-<td>初始化本地库</td>
-<td><code>git init</code>             生成<code>.git</code> 目录</td>
-</tr>
-<tr>
-<td>查看本地库状态</td>
-<td><code>git status</code></td>
-</tr>
-<tr>
-<td>添加到暂存区</td>
-<td><code>git add xxx</code> <br /><code>git add . </code>    （全部添加</td>
-</tr>
-<tr>
-<td>取消追踪</td>
-<td><code>git rm --cached xx</code><br /><code>git reset</code>                （还原最初状态，即退回全部</td>
-</tr>
-<tr>
-<td>提交到本地库</td>
-<td><code>git commit -m &quot;提交信息&quot; filename</code><br /><code>git commit -m &quot;提交信息&quot;</code>    （提交全部<br /><code>git commit -am &#39;提交信息&#39;</code> （文件已被追踪，可以 -am</td>
-</tr>
-<tr>
-<td>丢弃工作区的修改</td>
-<td><code>git restore xxx</code></td>
-</tr>
-<tr>
-<td>查看版本信息</td>
-<td><code>git reflog</code>    <br /><code>git log</code>      （更详细的版本信息</td>
-</tr>
-<tr>
-<td>版本切换</td>
-<td><code>git reset --hard 版本号</code></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>分支操作</strong></td>
-<td></td>
-</tr>
-<tr>
-<td>创建分支</td>
-<td><code>git branch 分支名</code></td>
-</tr>
-<tr>
-<td>查看分支</td>
-<td><code>git branch -v</code></td>
-</tr>
-<tr>
-<td>切换分支</td>
-<td><code>git checkout 分支名</code></td>
-</tr>
-<tr>
-<td>合并分支</td>
-<td><code>git merge 分支名</code></td>
-</tr>
-<tr>
-<td>重命名分支</td>
-<td><code>git branch -M 重命名</code></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>远程仓库操作</strong></td>
-<td></td>
-</tr>
-<tr>
-<td>克隆仓库到本地</td>
-<td><code>git clone 远程地址 [可以修改文件名]</code></td>
-</tr>
-<tr>
-<td>拉取远程仓库到本地</td>
-<td><code>git pull [别名] [分支]</code></td>
-</tr>
-<tr>
-<td>推送到远程仓库</td>
-<td><code>git push [别名][分支]</code></td>
-</tr>
-<tr>
-<td>连接远程仓库</td>
-<td><code>git remote add 别名 远程地址</code></td>
-</tr>
-<tr>
-<td>查看远程仓库</td>
-<td><code>git remote -v</code></td>
-</tr>
-</tbody></table>
-<p><strong>推荐：</strong></p>
-<ol>
-<li><p><a target="_blank" rel="noopener" href="https://git-scm.com/book/zh/v2">git-book</a></p>
-</li>
-<li><p><a target="_blank" rel="noopener" href="https://backlog.com/git-tutorial/cn/">猴子都能懂的GIT入门</a></p>
-</li>
-</ol>
+        <h1 id="PicGO"><a href="#PicGO" class="headerlink" title="PicGO"></a>PicGO</h1><h2 id="下载PicGo"><a href="#下载PicGo" class="headerlink" title="下载PicGo"></a>下载PicGo</h2><p><strong>PicGo: 一个用于快速上传图片并获取图片 URL 链接的工具</strong></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Molunerfinn/PicGo/releases">PicGo下载地址</a></p>
+<h2 id="PicGo中阿里云OSS配置"><a href="#PicGo中阿里云OSS配置" class="headerlink" title="PicGo中阿里云OSS配置"></a>PicGo中阿里云OSS配置</h2><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225333167.png" alt="image-20221114225333167"></p>
+<h1 id="Typora中配置PicGo"><a href="#Typora中配置PicGo" class="headerlink" title="Typora中配置PicGo"></a>Typora中配置PicGo</h1><ul>
+<li>打开偏好设置</li>
+<li>设置 <code>PicGo.exe</code> 的安装路径</li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114224959787.png" alt="image-20221114224959787"></p>
+<h1 id="阿里云OSS"><a href="#阿里云OSS" class="headerlink" title="阿里云OSS"></a>阿里云OSS</h1><h2 id="购买存储包"><a href="#购买存储包" class="headerlink" title="购买存储包"></a>购买存储包</h2><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225735353.png" alt="image-20221114225735353"></p>
+<h2 id="创建Bucket"><a href="#创建Bucket" class="headerlink" title="创建Bucket"></a>创建Bucket</h2><ul>
+<li>名称和地域自己自定义</li>
+<li>读写权限<code>公共读</code> ，其他默认即可</li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114230124215.png" alt="image-20221114230124215"></p>
+<h2 id="配置阿里云子账户"><a href="#配置阿里云子账户" class="headerlink" title="配置阿里云子账户"></a>配置阿里云子账户</h2><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225917643.png" alt="image-20221114225917643"></p>
+<h2 id="给Bucket授予子用户读写权限"><a href="#给Bucket授予子用户读写权限" class="headerlink" title="给Bucket授予子用户读写权限"></a>给Bucket授予子用户读写权限</h2><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114230613420.png" alt="image-20221114230613420"></p>
+<h2 id="分别填上PicGo中的必填参数即可"><a href="#分别填上PicGo中的必填参数即可" class="headerlink" title="分别填上PicGo中的必填参数即可"></a>分别填上PicGo中的必填参数即可</h2><p><strong>注意：存储区域的<code>aliyuncs.com</code> 后缀不要加上，因为PicGo请求时候会补上</strong></p>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225333167.png"></p>
+<h1 id="上传图片到图床"><a href="#上传图片到图床" class="headerlink" title="上传图片到图床"></a>上传图片到图床</h1><ul>
+<li>点击验证时，可能会报错，重启typora也无效</li>
+<li>直接在编辑页面，右键图片，点击 <code>上传图片</code>  即可</li>
+<li><code>格式 -》图像 -》上传本地所有图片</code> 是上传当前所有文件</li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114231134305.png" alt="image-20221114231134305"></p>
 
     </div>
 
@@ -348,8 +262,9 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/git/" rel="tag"># git</a>
-              <a href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag"># 工具</a>
+              <a href="/tags/%E5%8D%9A%E5%AE%A2/" rel="tag"># 博客</a>
+              <a href="/tags/%E5%9B%BE%E5%BA%8A/" rel="tag"># 图床</a>
+              <a href="/tags/PicGo/" rel="tag"># PicGo</a>
           </div>
 
         
@@ -358,13 +273,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/11/05/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4linux100%E8%AE%B2/" rel="prev" title="极客时间linux100讲">
-      <i class="fa fa-chevron-left"></i> 极客时间linux100讲
+    <a href="/2022/11/06/git/" rel="prev" title="git">
+      <i class="fa fa-chevron-left"></i> git
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2022/11/14/%E9%98%BF%E9%87%8C%E4%BA%91OSS%E5%9B%BE%E5%BA%8A-Typora-PicGo/" rel="next" title="阿里云OSS图床+Typora+PicGo">
-      阿里云OSS图床+Typora+PicGo <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -423,7 +335,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#git-%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">git 工作流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">git常用命令</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PicGO"><span class="nav-number">1.</span> <span class="nav-text">PicGO</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDPicGo"><span class="nav-number">1.1.</span> <span class="nav-text">下载PicGo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PicGo%E4%B8%AD%E9%98%BF%E9%87%8C%E4%BA%91OSS%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.</span> <span class="nav-text">PicGo中阿里云OSS配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Typora%E4%B8%AD%E9%85%8D%E7%BD%AEPicGo"><span class="nav-number">2.</span> <span class="nav-text">Typora中配置PicGo</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%98%BF%E9%87%8C%E4%BA%91OSS"><span class="nav-number">3.</span> <span class="nav-text">阿里云OSS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B4%AD%E4%B9%B0%E5%AD%98%E5%82%A8%E5%8C%85"><span class="nav-number">3.1.</span> <span class="nav-text">购买存储包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BABucket"><span class="nav-number">3.2.</span> <span class="nav-text">创建Bucket</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%90%E8%B4%A6%E6%88%B7"><span class="nav-number">3.3.</span> <span class="nav-text">配置阿里云子账户</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%99Bucket%E6%8E%88%E4%BA%88%E5%AD%90%E7%94%A8%E6%88%B7%E8%AF%BB%E5%86%99%E6%9D%83%E9%99%90"><span class="nav-number">3.4.</span> <span class="nav-text">给Bucket授予子用户读写权限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%88%AB%E5%A1%AB%E4%B8%8APicGo%E4%B8%AD%E7%9A%84%E5%BF%85%E5%A1%AB%E5%8F%82%E6%95%B0%E5%8D%B3%E5%8F%AF"><span class="nav-number">3.5.</span> <span class="nav-text">分别填上PicGo中的必填参数即可</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%8A%E4%BC%A0%E5%9B%BE%E7%89%87%E5%88%B0%E5%9B%BE%E5%BA%8A"><span class="nav-number">4.</span> <span class="nav-text">上传图片到图床</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
