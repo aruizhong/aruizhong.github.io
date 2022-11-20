@@ -20,31 +20,20 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="PicGO下载PicGoPicGo: 一个用于快速上传图片并获取图片 URL 链接的工具 PicGo下载地址 PicGo中阿里云OSS配置 Typora中配置PicGo 打开偏好设置 设置 PicGo.exe 的安装路径   阿里云OSS购买存储包 创建Bucket 名称和地域自己自定义 读写权限公共读 ，其他默认即可   配置阿里云子账户 给Bucket授予子用户读写权限 分别填上PicGo中的">
+  <meta name="description" content="官方压测脚本环境： kafka集群： hadoop102  ,  hadoop103  ,  hadoop104   压测客户端： hadoop105   生产者压测脚本： kafka-producer-perf-test.sh   消费者压测脚本：kafka-consumer-perf-test.sh   主要参数   命令参数 描述     record-size 是一条信息有多大，单位是字节">
 <meta property="og:type" content="article">
-<meta property="og:title" content="阿里云OSS图床+Typora+PicGo">
-<meta property="og:url" content="http://example.com/2022/11/14/%E9%98%BF%E9%87%8C%E4%BA%91OSS%E5%9B%BE%E5%BA%8A-Typora-PicGo/index.html">
+<meta property="og:title" content="Kafka调优">
+<meta property="og:url" content="http://example.com/2022/11/20/Kafka%E8%B0%83%E4%BC%98/index.html">
 <meta property="og:site_name" content="阿睿的博客">
-<meta property="og:description" content="PicGO下载PicGoPicGo: 一个用于快速上传图片并获取图片 URL 链接的工具 PicGo下载地址 PicGo中阿里云OSS配置 Typora中配置PicGo 打开偏好设置 设置 PicGo.exe 的安装路径   阿里云OSS购买存储包 创建Bucket 名称和地域自己自定义 读写权限公共读 ，其他默认即可   配置阿里云子账户 给Bucket授予子用户读写权限 分别填上PicGo中的">
+<meta property="og:description" content="官方压测脚本环境： kafka集群： hadoop102  ,  hadoop103  ,  hadoop104   压测客户端： hadoop105   生产者压测脚本： kafka-producer-perf-test.sh   消费者压测脚本：kafka-consumer-perf-test.sh   主要参数   命令参数 描述     record-size 是一条信息有多大，单位是字节">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225333167.png">
-<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114224959787.png">
-<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225735353.png">
-<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114230124215.png">
-<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225917643.png">
-<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114230613420.png">
-<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225333167.png">
-<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114231134305.png">
-<meta property="article:published_time" content="2022-11-14T15:26:45.000Z">
-<meta property="article:modified_time" content="2022-11-14T15:43:27.912Z">
+<meta property="article:published_time" content="2022-11-20T11:55:40.000Z">
+<meta property="article:modified_time" content="2022-11-20T11:56:21.015Z">
 <meta property="article:author" content="arui zhong">
-<meta property="article:tag" content="博客">
-<meta property="article:tag" content="图床">
-<meta property="article:tag" content="PicGo">
+<meta property="article:tag" content="kafka">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225333167.png">
 
-<link rel="canonical" href="http://example.com/2022/11/14/%E9%98%BF%E9%87%8C%E4%BA%91OSS%E5%9B%BE%E5%BA%8A-Typora-PicGo/">
+<link rel="canonical" href="http://example.com/2022/11/20/Kafka%E8%B0%83%E4%BC%98/">
 
 
 <script id="page-configurations">
@@ -57,7 +46,7 @@
   };
 </script>
 
-  <title>阿里云OSS图床+Typora+PicGo | 阿睿的博客</title>
+  <title>Kafka调优 | 阿睿的博客</title>
   
 
 
@@ -178,7 +167,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/14/%E9%98%BF%E9%87%8C%E4%BA%91OSS%E5%9B%BE%E5%BA%8A-Typora-PicGo/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/20/Kafka%E8%B0%83%E4%BC%98/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -191,7 +180,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          阿里云OSS图床+Typora+PicGo
+          Kafka调优
         </h1>
 
         <div class="post-meta">
@@ -202,7 +191,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-11-14 23:26:45 / 修改时间：23:43:27" itemprop="dateCreated datePublished" datetime="2022-11-14T23:26:45+08:00">2022-11-14</time>
+              <time title="创建时间：2022-11-20 19:55:40 / 修改时间：19:56:21" itemprop="dateCreated datePublished" datetime="2022-11-20T19:55:40+08:00">2022-11-20</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -210,11 +199,11 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%B7%A5%E5%85%B7/%E5%8D%9A%E5%AE%A2/" itemprop="url" rel="index"><span itemprop="name">博客</span></a>
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/kafka/" itemprop="url" rel="index"><span itemprop="name">kafka</span></a>
                 </span>
             </span>
 
@@ -229,30 +218,102 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="PicGO"><a href="#PicGO" class="headerlink" title="PicGO"></a>PicGO</h1><h2 id="下载PicGo"><a href="#下载PicGo" class="headerlink" title="下载PicGo"></a>下载PicGo</h2><p><strong>PicGo: 一个用于快速上传图片并获取图片 URL 链接的工具</strong></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/Molunerfinn/PicGo/releases">PicGo下载地址</a></p>
-<h2 id="PicGo中阿里云OSS配置"><a href="#PicGo中阿里云OSS配置" class="headerlink" title="PicGo中阿里云OSS配置"></a>PicGo中阿里云OSS配置</h2><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225333167.png" alt="image-20221114225333167"></p>
-<h1 id="Typora中配置PicGo"><a href="#Typora中配置PicGo" class="headerlink" title="Typora中配置PicGo"></a>Typora中配置PicGo</h1><ul>
-<li>打开偏好设置</li>
-<li>设置 <code>PicGo.exe</code> 的安装路径</li>
+        <h1 id="官方压测脚本"><a href="#官方压测脚本" class="headerlink" title="官方压测脚本"></a>官方压测脚本</h1><h2 id="环境："><a href="#环境：" class="headerlink" title="环境："></a>环境：</h2><ul>
+<li><p>kafka集群： <code>hadoop102  ,  hadoop103  ,  hadoop104</code> </p>
+</li>
+<li><p>压测客户端： <code>hadoop105</code> </p>
+</li>
+<li><p>生产者压测脚本： <code>kafka-producer-perf-test.sh</code> </p>
+</li>
+<li><p>消费者压测脚本：<code>kafka-consumer-perf-test.sh</code></p>
+</li>
 </ul>
-<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114224959787.png" alt="image-20221114224959787"></p>
-<h1 id="阿里云OSS"><a href="#阿里云OSS" class="headerlink" title="阿里云OSS"></a>阿里云OSS</h1><h2 id="购买存储包"><a href="#购买存储包" class="headerlink" title="购买存储包"></a>购买存储包</h2><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225735353.png" alt="image-20221114225735353"></p>
-<h2 id="创建Bucket"><a href="#创建Bucket" class="headerlink" title="创建Bucket"></a>创建Bucket</h2><ul>
-<li>名称和地域自己自定义</li>
-<li>读写权限<code>公共读</code> ，其他默认即可</li>
-</ul>
-<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114230124215.png" alt="image-20221114230124215"></p>
-<h2 id="配置阿里云子账户"><a href="#配置阿里云子账户" class="headerlink" title="配置阿里云子账户"></a>配置阿里云子账户</h2><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225917643.png" alt="image-20221114225917643"></p>
-<h2 id="给Bucket授予子用户读写权限"><a href="#给Bucket授予子用户读写权限" class="headerlink" title="给Bucket授予子用户读写权限"></a>给Bucket授予子用户读写权限</h2><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114230613420.png" alt="image-20221114230613420"></p>
-<h2 id="分别填上PicGo中的必填参数即可"><a href="#分别填上PicGo中的必填参数即可" class="headerlink" title="分别填上PicGo中的必填参数即可"></a>分别填上PicGo中的必填参数即可</h2><p><strong>注意：存储区域的<code>aliyuncs.com</code> 后缀不要加上，因为PicGo请求时候会补上</strong></p>
-<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114225333167.png"></p>
-<h1 id="上传图片到图床"><a href="#上传图片到图床" class="headerlink" title="上传图片到图床"></a>上传图片到图床</h1><ul>
-<li>点击验证时，可能会报错，重启typora也无效</li>
-<li>直接在编辑页面，右键图片，点击 <code>上传图片</code>  即可</li>
-<li><code>格式 -》图像 -》上传本地所有图片</code> 是上传当前所有文件</li>
-</ul>
-<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221114231134305.png" alt="image-20221114231134305"></p>
+<h2 id="主要参数"><a href="#主要参数" class="headerlink" title="主要参数"></a>主要参数</h2><table>
+<thead>
+<tr>
+<th>命令参数</th>
+<th>描述</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>record-size</code></td>
+<td>是一条信息有多大，单位是字节，本次测试设置为 1k</td>
+<td></td>
+</tr>
+<tr>
+<td><code>num-records</code></td>
+<td>是总共发送多少条信息，本次测试设置为 100 万条</td>
+<td></td>
+</tr>
+<tr>
+<td><code>throughput</code></td>
+<td>是每秒多少条信息，设成-1，表示不限流，尽可能快的生产数据，可测 出生产者最大吞吐量。本次实验设置为每秒钟 1 万条</td>
+<td></td>
+</tr>
+<tr>
+<td><code>producer-props</code></td>
+<td>后面可以配置生产者相关参数，batch.size 配置为 16k。</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>messages</code></td>
+<td>消费者消费数据的总数</td>
+<td></td>
+</tr>
+<tr>
+<td><code>consumer.config</code></td>
+<td>指定消费者的配置文件<code>--consumer.config config/consumer.properties</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>max.poll.records=2000</code></td>
+<td>消费者每次拉取2000条消息（消费者配置文件中添加或修改）</td>
+<td></td>
+</tr>
+<tr>
+<td><code>fetch.max.bytes=104857600</code></td>
+<td>消费者每次拉取消息的大小（消费者配置文件中添加或修改）</td>
+<td></td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>生产者端压测参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>batch.size</code></td>
+<td>每批次发送请求拉取大小，单位Byte</td>
+</tr>
+<tr>
+<td><code>linger.ms</code></td>
+<td>每批次发送请求拉取时间limit</td>
+</tr>
+<tr>
+<td><code>compression.type</code></td>
+<td>生产者端压缩类型</td>
+</tr>
+<tr>
+<td><code>buffer.memory</code></td>
+<td>生产者端消息缓存的内存大小</td>
+</tr>
+</tbody></table>
+<h2 id="压测"><a href="#压测" class="headerlink" title="压测"></a>压测</h2><h3 id="1-kafka集群-创建一个压测主题-test，设置为-3-个分区-3-个副本"><a href="#1-kafka集群-创建一个压测主题-test，设置为-3-个分区-3-个副本" class="headerlink" title="1. kafka集群  创建一个压测主题 test，设置为 3 个分区 3 个副本"></a>1. <code>kafka集群</code>  创建一个压测主题 <code>test</code>，设置为 3 个分区 3 个副本</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-topics.sh --bootstrap-server hadoop102:9092 --create --topic test --replication-factor 3 --partitions 3 </span><br></pre></td></tr></table></figure>
+
+<h3 id="2-压测客户端-hadoop105-，-压测集群100万数据生产能力"><a href="#2-压测客户端-hadoop105-，-压测集群100万数据生产能力" class="headerlink" title="2. 压测客户端 hadoop105 ， 压测集群100万数据生产能力"></a>2. <code>压测客户端 hadoop105</code> ， 压测集群100万数据生产能力</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-producer-perf-test.sh --topic test --record-size 1024 --num-records 1000000 --throughput 10000 --producer-props bootstrap.servers=hadoop102:9092,hadoop103:9092,hadoop104:9092 batch.size=16384 linger.ms=0</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-producer-perf-test.sh --topic test --record-size 1024 --num-records 1000000 --throughput 10000 --producer-props bootstrap.servers=hadoop102:9092,hadoop103:9092,hadoop104:9092 batch.size=16384 linger.ms=0 compression.type=snappy buffer.memory=67108864</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-压测客户端-hadoop105-，压测集群100万数据消费能力"><a href="#3-压测客户端-hadoop105-，压测集群100万数据消费能力" class="headerlink" title="3. 压测客户端 hadoop105 ，压测集群100万数据消费能力"></a>3. <code>压测客户端 hadoop105</code> ，压测集群100万数据消费能力</h3><p>修改消费者配置文件 <code>config/consumer.properties</code> 相关参数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-consumer-perf-test.sh --bootstrap-server hadoop102:9092,hadoop103:9092,hadoop104:9092 --topic test --messages 1000000 --consumer.config config/consumer.properties</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -262,9 +323,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E5%8D%9A%E5%AE%A2/" rel="tag"># 博客</a>
-              <a href="/tags/%E5%9B%BE%E5%BA%8A/" rel="tag"># 图床</a>
-              <a href="/tags/PicGo/" rel="tag"># PicGo</a>
+              <a href="/tags/kafka/" rel="tag"># kafka</a>
           </div>
 
         
@@ -273,13 +332,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/11/06/git/" rel="prev" title="git">
-      <i class="fa fa-chevron-left"></i> git
+    <a href="/2022/11/20/Kafka%E9%9B%86%E6%88%90/" rel="prev" title="Kafka集成">
+      <i class="fa fa-chevron-left"></i> Kafka集成
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2022/11/20/Kafka%E5%9F%BA%E6%9C%AC%E8%AE%A4%E8%AF%86/" rel="next" title="Kafka基本认识">
-      Kafka基本认识 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -338,7 +394,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PicGO"><span class="nav-number">1.</span> <span class="nav-text">PicGO</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDPicGo"><span class="nav-number">1.1.</span> <span class="nav-text">下载PicGo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PicGo%E4%B8%AD%E9%98%BF%E9%87%8C%E4%BA%91OSS%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.</span> <span class="nav-text">PicGo中阿里云OSS配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Typora%E4%B8%AD%E9%85%8D%E7%BD%AEPicGo"><span class="nav-number">2.</span> <span class="nav-text">Typora中配置PicGo</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%98%BF%E9%87%8C%E4%BA%91OSS"><span class="nav-number">3.</span> <span class="nav-text">阿里云OSS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B4%AD%E4%B9%B0%E5%AD%98%E5%82%A8%E5%8C%85"><span class="nav-number">3.1.</span> <span class="nav-text">购买存储包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BABucket"><span class="nav-number">3.2.</span> <span class="nav-text">创建Bucket</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E9%98%BF%E9%87%8C%E4%BA%91%E5%AD%90%E8%B4%A6%E6%88%B7"><span class="nav-number">3.3.</span> <span class="nav-text">配置阿里云子账户</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%99Bucket%E6%8E%88%E4%BA%88%E5%AD%90%E7%94%A8%E6%88%B7%E8%AF%BB%E5%86%99%E6%9D%83%E9%99%90"><span class="nav-number">3.4.</span> <span class="nav-text">给Bucket授予子用户读写权限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%88%AB%E5%A1%AB%E4%B8%8APicGo%E4%B8%AD%E7%9A%84%E5%BF%85%E5%A1%AB%E5%8F%82%E6%95%B0%E5%8D%B3%E5%8F%AF"><span class="nav-number">3.5.</span> <span class="nav-text">分别填上PicGo中的必填参数即可</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%8A%E4%BC%A0%E5%9B%BE%E7%89%87%E5%88%B0%E5%9B%BE%E5%BA%8A"><span class="nav-number">4.</span> <span class="nav-text">上传图片到图床</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E5%8E%8B%E6%B5%8B%E8%84%9A%E6%9C%AC"><span class="nav-number">1.</span> <span class="nav-text">官方压测脚本</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%EF%BC%9A"><span class="nav-number">1.1.</span> <span class="nav-text">环境：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E5%8F%82%E6%95%B0"><span class="nav-number">1.2.</span> <span class="nav-text">主要参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%8B%E6%B5%8B"><span class="nav-number">1.3.</span> <span class="nav-text">压测</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-kafka%E9%9B%86%E7%BE%A4-%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%8E%8B%E6%B5%8B%E4%B8%BB%E9%A2%98-test%EF%BC%8C%E8%AE%BE%E7%BD%AE%E4%B8%BA-3-%E4%B8%AA%E5%88%86%E5%8C%BA-3-%E4%B8%AA%E5%89%AF%E6%9C%AC"><span class="nav-number">1.3.1.</span> <span class="nav-text">1. kafka集群  创建一个压测主题 test，设置为 3 个分区 3 个副本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%8E%8B%E6%B5%8B%E5%AE%A2%E6%88%B7%E7%AB%AF-hadoop105-%EF%BC%8C-%E5%8E%8B%E6%B5%8B%E9%9B%86%E7%BE%A4100%E4%B8%87%E6%95%B0%E6%8D%AE%E7%94%9F%E4%BA%A7%E8%83%BD%E5%8A%9B"><span class="nav-number">1.3.2.</span> <span class="nav-text">2. 压测客户端 hadoop105 ， 压测集群100万数据生产能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8E%8B%E6%B5%8B%E5%AE%A2%E6%88%B7%E7%AB%AF-hadoop105-%EF%BC%8C%E5%8E%8B%E6%B5%8B%E9%9B%86%E7%BE%A4100%E4%B8%87%E6%95%B0%E6%8D%AE%E6%B6%88%E8%B4%B9%E8%83%BD%E5%8A%9B"><span class="nav-number">1.3.3.</span> <span class="nav-text">3. 压测客户端 hadoop105 ，压测集群100万数据消费能力</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

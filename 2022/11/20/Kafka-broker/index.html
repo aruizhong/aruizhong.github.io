@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Broker工作流程Zookeeper 存储的 Kafka 信息 命令行查看kafka信息  12bin&#x2F;zkCli.sh ls &#x2F;kafka   prettyzoo工具查看信息    broker 工作流程 broker重要参数   参数 描述    replica.lag.time.max.ms ISR 中，如果 Follower 长时间未向 Leader 发送通 信请求或同步数据，则该 Fo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka-broker">
+<meta property="og:url" content="http://example.com/2022/11/20/Kafka-broker/index.html">
+<meta property="og:site_name" content="阿睿的博客">
+<meta property="og:description" content="Broker工作流程Zookeeper 存储的 Kafka 信息 命令行查看kafka信息  12bin&#x2F;zkCli.sh ls &#x2F;kafka   prettyzoo工具查看信息    broker 工作流程 broker重要参数   参数 描述    replica.lag.time.max.ms ISR 中，如果 Follower 长时间未向 Leader 发送通 信请求或同步数据，则该 Fo">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116183232373.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116183823286.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116184306626.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116191546552.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116201029203.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116201647784.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116204839470.png">
+<meta property="article:published_time" content="2022-11-20T11:51:33.000Z">
+<meta property="article:modified_time" content="2022-11-20T11:58:42.752Z">
+<meta property="article:author" content="arui zhong">
+<meta property="article:tag" content="kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116183232373.png">
+
+<link rel="canonical" href="http://example.com/2022/11/20/Kafka-broker/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kafka-broker | 阿睿的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">阿睿的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">keep going>>></p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/20/Kafka-broker/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="arui zhong">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="阿睿的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Kafka-broker
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-11-20 19:51:33 / 修改时间：19:58:42" itemprop="dateCreated datePublished" datetime="2022-11-20T19:51:33+08:00">2022-11-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/kafka/" itemprop="url" rel="index"><span itemprop="name">kafka</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Broker工作流程"><a href="#Broker工作流程" class="headerlink" title="Broker工作流程"></a>Broker工作流程</h1><h2 id="Zookeeper-存储的-Kafka-信息"><a href="#Zookeeper-存储的-Kafka-信息" class="headerlink" title="Zookeeper 存储的 Kafka 信息"></a>Zookeeper 存储的 Kafka 信息</h2><ul>
+<li>命令行查看kafka信息</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bin/zkCli.sh </span><br><span class="line">ls /kafka</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>prettyzoo工具查看信息</p>
+<img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116183232373.png" alt="image-20221116183232373" style="zoom: 50%;" /></li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116183823286.png" alt="image-20221116183823286"></p>
+<h2 id="broker-工作流程"><a href="#broker-工作流程" class="headerlink" title="broker 工作流程"></a>broker 工作流程</h2><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116184306626.png" alt="image-20221116184306626"></p>
+<h2 id="broker重要参数"><a href="#broker重要参数" class="headerlink" title="broker重要参数"></a>broker重要参数</h2><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>replica.lag.time.max.ms</code></td>
+<td>ISR 中，如果 Follower 长时间未向 Leader 发送通 信请求或同步数据，则该 Follower 将被踢出 ISR。 该时间阈值，&#x3D;&#x3D;默认 30s。&#x3D;&#x3D;</td>
+</tr>
+<tr>
+<td><code>auto.leader.rebalance.enable</code></td>
+<td>&#x3D;&#x3D;默认是 true。&#x3D;&#x3D; 自动 Leader Partition 平衡。</td>
+</tr>
+<tr>
+<td><code>leader.imbalance.per.broker.percentage</code></td>
+<td>&#x3D;&#x3D;默认是 10%。&#x3D;&#x3D;每个 broker 允许的不平衡的 leader 的比率。如果每个 broker 超过了这个值，控制器 会触发 leader 的平衡。</td>
+</tr>
+<tr>
+<td><code>leader.imbalance.check.interval.seconds</code></td>
+<td>&#x3D;&#x3D;默认值 300 秒&#x3D;&#x3D;。检查 leader 负载是否平衡的间隔时间。</td>
+</tr>
+<tr>
+<td><code>log.segment.bytes</code></td>
+<td>Kafka 中 log 日志是分成一块块存储的，此配置是 指 log 日志划分 成块的大小，&#x3D;&#x3D;默认值 1G&#x3D;&#x3D;</td>
+</tr>
+<tr>
+<td><code>log.index.interval.bytes</code></td>
+<td>&#x3D;&#x3D;默认 4kb，&#x3D;&#x3D;kafka 里面每当写入了 4kb 大小的日志 （.log），然后就往 index 文件里面记录一个索引</td>
+</tr>
+<tr>
+<td><code>log.retention.hours</code></td>
+<td>Kafka 中数据保存的时间，&#x3D;&#x3D;默认 7 天。&#x3D;&#x3D;</td>
+</tr>
+<tr>
+<td><code>log.retention.minutes</code></td>
+<td>Kafka 中数据保存的时间，分钟级别，默认关闭。</td>
+</tr>
+<tr>
+<td><code>log.retention.ms</code></td>
+<td>Kafka 中数据保存的时间，毫秒级别，默认关闭。</td>
+</tr>
+<tr>
+<td><code>log.retention.check.interval.ms</code></td>
+<td>检查数据是否保存超时的间隔，默认是 5 分钟。</td>
+</tr>
+<tr>
+<td><code>log.retention.bytes</code></td>
+<td>&#x3D;&#x3D;默认等于-1，表示无穷大。&#x3D;&#x3D;超过设置的所有日志总大小，删除最早的 segment。</td>
+</tr>
+<tr>
+<td><code>log.cleanup.policy</code></td>
+<td>&#x3D;&#x3D;默认是 delete&#x3D;&#x3D;，表示所有数据启用删除策略； 如果设置值为 compact，表示所有数据启用压缩策 略。</td>
+</tr>
+<tr>
+<td><code>num.io.threads</code></td>
+<td>&#x3D;&#x3D;默认是 8&#x3D;&#x3D;。负责写磁盘的线程数。整个参数值要占 总核数的 50%。</td>
+</tr>
+<tr>
+<td><code>num.replica.fetchers</code></td>
+<td>副本拉取线程数，这个参数占总核数的 50%的 1&#x2F;3</td>
+</tr>
+<tr>
+<td><code>num.network.threads</code></td>
+<td>&#x3D;&#x3D;默认是 3&#x3D;&#x3D;。数据传输线程数，这个参数占总核数的 50%的 2&#x2F;3 。</td>
+</tr>
+<tr>
+<td><code>log.flush.interval.messages</code></td>
+<td>强制页缓存刷写到磁盘的条数，默认是 long 的最大值，9223372036854775807。一般不建议修改， 交给系统自己管理。</td>
+</tr>
+<tr>
+<td><code>log.flush.interval.ms</code></td>
+<td>每隔多久，刷数据到磁盘，默认是 null。一般不建 议修改，交给系统自己管理。</td>
+</tr>
+</tbody></table>
+<h1 id="Kafka的副本"><a href="#Kafka的副本" class="headerlink" title="Kafka的副本"></a>Kafka的副本</h1><h2 id="副本基本信息"><a href="#副本基本信息" class="headerlink" title="副本基本信息"></a>副本基本信息</h2><ul>
+<li>Kafka 中副本分为：Leader 和 Follower。Kafka 生产者只会把数据发往 Leader， 然后 Follower 找 Leader 进行同步数据</li>
+<li>Kafka 分区中的所有副本统称为 AR（Assigned Repllicas）。AR &#x3D; ISR + OSR<ul>
+<li>ISR，表示和 Leader 保持同步的 Follower 集合。如果 Follower 长时间未向 Leader 发送通信请求或同步数据，则该 Follower 将被踢出 ISR。该时间阈值由 <code>replica.lag.time.max.ms</code> 参数设定，默认 30s。Leader 发生故障之后，就会从 ISR 中选举新的 Leader。</li>
+<li>OSR，表示 Follower 与 Leader 副本同步时，延迟过多的副本。</li>
+</ul>
+</li>
+</ul>
+<h2 id="leader选举"><a href="#leader选举" class="headerlink" title="leader选举"></a>leader选举</h2><p>Kafka 集群中有一个 broker 的 Controller 会被选举为 Controller Leader，负责管理集群 broker 的上下线，所有 topic 的分区副本分配和 Leader 选举等工作。 Controller 的信息同步工作是依赖于 Zookeeper 的</p>
+<img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116191546552.png" alt="image-20221116191546552" style="zoom: 50%;" />
+
+<h3 id="leader和follower故障问题"><a href="#leader和follower故障问题" class="headerlink" title="leader和follower故障问题"></a>leader和follower故障问题</h3><ul>
+<li><p>LEO（Log End Offset）：每个副本的最后一个offset</p>
+</li>
+<li><p>HW（High Watermark）：所有副本中最小的LEO</p>
+</li>
+</ul>
+<h4 id="follower故障"><a href="#follower故障" class="headerlink" title="follower故障"></a>follower故障</h4><ul>
+<li>该follower被退出 Isr队列，leader和其他follower正常运行</li>
+<li>如果被提出的follower恢复了，并不能立即加入 Isr</li>
+<li>待该Follower恢复后，Follower会读取本地磁盘记录的 上次的<code>HW(high watermask)</code> ，并将log文件高于HW的部分截取掉，从HW开始向Leader进行同步。 </li>
+<li>等该Follower的LEO大于等于该Partition的HW，即 Follower追上Leader之后，就可以重新加入ISR了。</li>
+</ul>
+<h4 id="leader-故障"><a href="#leader-故障" class="headerlink" title="leader 故障"></a>leader 故障</h4><ul>
+<li>leader故障了，被踢出 Isr</li>
+<li>为保证多个副本之间的数据一致性，&#x3D;&#x3D;其余的Follower会先 将各自的log文件高于HW的部分截掉&#x3D;&#x3D;，然后从新的Leader同步 数据。</li>
+</ul>
+<p>&#x3D;&#x3D;注意：这只能保证副本之间的数据一致性，并不能保 证数据不丢失或者不重复。&#x3D;&#x3D;</p>
+<h2 id="手动调整副本存储位置"><a href="#手动调整副本存储位置" class="headerlink" title="手动调整副本存储位置"></a>手动调整副本存储位置</h2><ul>
+<li><p>创建副本存储计划（所有副本都指定存储在 broker0、broker1 中）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim increase-replication-factor.json</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">&quot;version&quot;:1,</span><br><span class="line">&quot;partitions&quot;:[&#123;&quot;topic&quot;:&quot;topicname&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[0,1]&#125;,</span><br><span class="line">&#123;&quot;topic&quot;:&quot;three&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[0,1]&#125;,</span><br><span class="line">&#123;&quot;topic&quot;:&quot;three&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[1,0]&#125;,</span><br><span class="line">&#123;&quot;topic&quot;:&quot;three&quot;,&quot;partition&quot;:3,&quot;replicas&quot;:[1,0]&#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>执行副本存储计划</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-reassign-partitions.sh --bootstrap-server hadoop102:9092 --reassignment-json-file increase-replication-factor.json --execute</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>验证副本存储计划</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-reassign-partitions.sh --bootstrap-server hadoop102:9092 --reassignment-json-file increase-replication-factor.json --verify</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看主题情况</p>
+</li>
+</ul>
+<h2 id="自动再平衡"><a href="#自动再平衡" class="headerlink" title="自动再平衡"></a>自动再平衡</h2><p>默认是打开的，建议关闭</p>
+<p>相关参数:</p>
+<ul>
+<li><code>auto.leader.rebalance.enable</code>，默认是true。 自动Leader Partition 平衡  </li>
+<li><code>leader.imbalance.per.broker.percentage</code>， 默认是10%。每个broker允许的不平衡 的leader的比率。如果每个broker超过 了这个值，控制器会触发leader的平衡。 </li>
+<li><code>leader.imbalance.check.interval.seconds</code>， 默认值300秒。检查leader负载是否平衡 的间隔时间。</li>
+</ul>
+<h2 id="增加副本"><a href="#增加副本" class="headerlink" title="增加副本"></a>增加副本</h2><p><strong>不能通过命令操作来增加副本</strong> </p>
+<ul>
+<li><p>创建副本存储计划</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim increase-replication-factor.json</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">&quot;version&quot;:1,</span><br><span class="line">&quot;partitions&quot;:[&#123;&quot;topic&quot;:&quot;topicname&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[0,1,2]&#125;,</span><br><span class="line">&#123;&quot;topic&quot;:&quot;three&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[0,1,2]&#125;,</span><br><span class="line">&#123;&quot;topic&quot;:&quot;three&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[1,0,2]&#125;,</span><br><span class="line">&#123;&quot;topic&quot;:&quot;three&quot;,&quot;partition&quot;:3,&quot;replicas&quot;:[1,0,2]&#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>执行计划</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-reassign-partitions.sh --bootstrap-server hadoop102:9092 --reassignment-json-file increase-replication-factor.json --execute</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="文件存储"><a href="#文件存储" class="headerlink" title="文件存储"></a>文件存储</h1><p><code>topic</code>  ,  <code>partition</code>   ,  <code>log</code>  ,  <code>segment</code>  ,   </p>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116201029203.png" alt="image-20221116201029203"></p>
+<h2 id="查看日志文件、索引文件"><a href="#查看日志文件、索引文件" class="headerlink" title="查看日志文件、索引文件"></a>查看日志文件、索引文件</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-run-class.sh kafka.tools.DumpLogSegments --files ./00000000000000000000.index</span><br></pre></td></tr></table></figure>
+
+<h2 id="log文件和index文件"><a href="#log文件和index文件" class="headerlink" title="log文件和index文件"></a>log文件和index文件</h2><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116201647784.png" alt="image-20221116201647784"></p>
+<h2 id="相关参数"><a href="#相关参数" class="headerlink" title="相关参数"></a>相关参数</h2><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>log.segment.bytes</code></td>
+<td>Kafka 中 log 日志是分成一块块存储的，此配置是指 log 日志划分 成块的大小，默认值 1G</td>
+</tr>
+<tr>
+<td><code>log.index.interval.bytes</code></td>
+<td>默认 4kb，kafka 里面每当写入了 4kb 大小的日志（.log），然后就 往 index 文件里面记录一个索引。 稀疏索引。</td>
+</tr>
+</tbody></table>
+<h2 id="文件清理策略"><a href="#文件清理策略" class="headerlink" title="文件清理策略"></a>文件清理策略</h2><h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><p>Kafka 中默认的日志保存时间为 &#x3D;&#x3D;7 天&#x3D;&#x3D;，可以通过调整如下参数修改保存时间。 </p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>log.retention.hours</code></td>
+<td>最低优先级小时，默认 7 天</td>
+</tr>
+<tr>
+<td><code> log.retention.minutes</code></td>
+<td>分钟</td>
+</tr>
+<tr>
+<td><code> log.retention.ms</code></td>
+<td>最高优先级毫秒</td>
+</tr>
+<tr>
+<td><code> log.retention.check.interval.ms</code></td>
+<td>负责设置检查周期，默认 5 分钟</td>
+</tr>
+</tbody></table>
+<p><code> log.cleanup.policy = delete</code>  所有数据启用删除策略 </p>
+<ul>
+<li>基于时间：默认打开。以 segment 中所有记录中的最大时间戳作为该文件时间戳</li>
+<li>基于大小：默认关闭。超过设置的所有日志总大小，删除最早的 segment。 <code>log.retention.bytes</code> 默认等于-1，表示无穷大。</li>
+</ul>
+<h2 id="压缩"><a href="#压缩" class="headerlink" title="压缩"></a>压缩</h2><p>compact日志压缩：&#x3D;&#x3D;对于相同key的不同value值，只保留最后一个版本。&#x3D;&#x3D;</p>
+<p><code>log.cleanup.policy = compact </code> 所有数据启用压缩策</p>
+<h1 id="高效读写数据"><a href="#高效读写数据" class="headerlink" title="高效读写数据"></a>高效读写数据</h1><ul>
+<li><p>分布式集群架构，且主题采用分区思想，并行度高</p>
+</li>
+<li><p>日志文件采用稀疏索引，可以快速找到文件</p>
+</li>
+<li><p>磁盘顺序读写的方式，比随机读写高的多（600M&#x2F;s   对比 100 k&#x2F;s)</p>
+</li>
+<li><p>页缓存  + 零拷贝技术</p>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221116204839470.png" alt="image-20221116204839470"></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/kafka/" rel="tag"># kafka</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/20/Kafka%E7%94%9F%E4%BA%A7%E8%80%85/" rel="prev" title="Kafka生产者">
+      <i class="fa fa-chevron-left"></i> Kafka生产者
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/20/Kafka%E6%B6%88%E8%B4%B9%E8%80%85/" rel="next" title="Kafka消费者">
+      Kafka消费者 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Broker%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">Broker工作流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Zookeeper-%E5%AD%98%E5%82%A8%E7%9A%84-Kafka-%E4%BF%A1%E6%81%AF"><span class="nav-number">1.1.</span> <span class="nav-text">Zookeeper 存储的 Kafka 信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#broker-%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.</span> <span class="nav-text">broker 工作流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#broker%E9%87%8D%E8%A6%81%E5%8F%82%E6%95%B0"><span class="nav-number">1.3.</span> <span class="nav-text">broker重要参数</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka%E7%9A%84%E5%89%AF%E6%9C%AC"><span class="nav-number">2.</span> <span class="nav-text">Kafka的副本</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%AF%E6%9C%AC%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF"><span class="nav-number">2.1.</span> <span class="nav-text">副本基本信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#leader%E9%80%89%E4%B8%BE"><span class="nav-number">2.2.</span> <span class="nav-text">leader选举</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#leader%E5%92%8Cfollower%E6%95%85%E9%9A%9C%E9%97%AE%E9%A2%98"><span class="nav-number">2.2.1.</span> <span class="nav-text">leader和follower故障问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#follower%E6%95%85%E9%9A%9C"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">follower故障</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#leader-%E6%95%85%E9%9A%9C"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">leader 故障</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E8%B0%83%E6%95%B4%E5%89%AF%E6%9C%AC%E5%AD%98%E5%82%A8%E4%BD%8D%E7%BD%AE"><span class="nav-number">2.3.</span> <span class="nav-text">手动调整副本存储位置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E5%86%8D%E5%B9%B3%E8%A1%A1"><span class="nav-number">2.4.</span> <span class="nav-text">自动再平衡</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A2%9E%E5%8A%A0%E5%89%AF%E6%9C%AC"><span class="nav-number">2.5.</span> <span class="nav-text">增加副本</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8"><span class="nav-number">3.</span> <span class="nav-text">文件存储</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E3%80%81%E7%B4%A2%E5%BC%95%E6%96%87%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">查看日志文件、索引文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#log%E6%96%87%E4%BB%B6%E5%92%8Cindex%E6%96%87%E4%BB%B6"><span class="nav-number">3.2.</span> <span class="nav-text">log文件和index文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0"><span class="nav-number">3.3.</span> <span class="nav-text">相关参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E6%B8%85%E7%90%86%E7%AD%96%E7%95%A5"><span class="nav-number">3.4.</span> <span class="nav-text">文件清理策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4"><span class="nav-number">3.4.1.</span> <span class="nav-text">删除</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%8B%E7%BC%A9"><span class="nav-number">3.5.</span> <span class="nav-text">压缩</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E6%95%88%E8%AF%BB%E5%86%99%E6%95%B0%E6%8D%AE"><span class="nav-number">4.</span> <span class="nav-text">高效读写数据</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">arui zhong</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/aruizhong" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;aruizhong" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:aruizhong@163.com" title="E-Mail → mailto:aruizhong@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">arui zhong</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
