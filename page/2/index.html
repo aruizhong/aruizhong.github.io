@@ -20,38 +20,28 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="安装 hexo前提安装git123456789sudo yum install git-core -ygit --version# 配置git全局用户信息git config --global user.name &quot;yourgithubname&quot;git config --global user.email &quot;yourgithubemail&quot;# 生成ssh k">
-<meta property="og:type" content="article">
-<meta property="og:title" content="hexo搭建博客及博客备份">
-<meta property="og:url" content="http://example.com/2022/10/30/hexo%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E5%8F%8A%E5%8D%9A%E5%AE%A2%E5%A4%87%E4%BB%BD/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="阿睿的博客">
+<meta property="og:url" content="http://example.com/page/2/index.html">
 <meta property="og:site_name" content="阿睿的博客">
-<meta property="og:description" content="安装 hexo前提安装git123456789sudo yum install git-core -ygit --version# 配置git全局用户信息git config --global user.name &quot;yourgithubname&quot;git config --global user.email &quot;yourgithubemail&quot;# 生成ssh k">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221029194430037.png">
-<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221029194736708.png">
-<meta property="og:image" content="http://example.com/images/image-20221029201951806.png">
-<meta property="article:published_time" content="2022-10-30T12:16:53.000Z">
-<meta property="article:modified_time" content="2022-11-14T15:42:37.075Z">
 <meta property="article:author" content="arui zhong">
-<meta property="article:tag" content="博客">
-<meta property="article:tag" content="hexo">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221029194430037.png">
 
-<link rel="canonical" href="http://example.com/2022/10/30/hexo%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E5%8F%8A%E5%8D%9A%E5%AE%A2%E5%A4%87%E4%BB%BD/">
+<link rel="canonical" href="http://example.com/page/2/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : false,
-    isPost : true,
+    isHome : true,
+    isPost : false,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>hexo搭建博客及博客备份 | 阿睿的博客</title>
+  <title>阿睿的博客</title>
   
 
 
@@ -165,10 +155,9 @@
         <div class="content-wrap">
           
 
-          <div class="content post posts-expand">
+          <div class="content index posts-expand">
             
-
-    
+      
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -184,9 +173,10 @@
       <meta itemprop="name" content="阿睿的博客">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          hexo搭建博客及博客备份
-        </h1>
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/10/30/hexo%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E5%8F%8A%E5%8D%9A%E5%AE%A2%E5%A4%87%E4%BB%BD/" class="post-title-link" itemprop="url">hexo搭建博客及博客备份</a>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -229,7 +219,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="安装-hexo前提"><a href="#安装-hexo前提" class="headerlink" title="安装 hexo前提"></a>安装 hexo前提</h1><h2 id="安装git"><a href="#安装git" class="headerlink" title="安装git"></a>安装git</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install git-core -y</span><br><span class="line">git --version</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配置git全局用户信息</span></span><br><span class="line">git config --global user.name &quot;yourgithubname&quot;</span><br><span class="line">git config --global user.email &quot;yourgithubemail&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">生成ssh key</span></span><br><span class="line">ssh-keygen -t rsa -C &quot;youremail&quot;</span><br></pre></td></tr></table></figure>
+          <h1 id="安装-hexo前提"><a href="#安装-hexo前提" class="headerlink" title="安装 hexo前提"></a>安装 hexo前提</h1><h2 id="安装git"><a href="#安装git" class="headerlink" title="安装git"></a>安装git</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install git-core -y</span><br><span class="line">git --version</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配置git全局用户信息</span></span><br><span class="line">git config --global user.name &quot;yourgithubname&quot;</span><br><span class="line">git config --global user.email &quot;yourgithubemail&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">生成ssh key</span></span><br><span class="line">ssh-keygen -t rsa -C &quot;youremail&quot;</span><br></pre></td></tr></table></figure>
 
 <h2 id="安装Node-js"><a href="#安装Node-js" class="headerlink" title="安装Node.js"></a>安装Node.js</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL https://rpm.nodesource.com/setup_16.x | sudo bash -</span><br><span class="line">sudo yum install -y nodejs</span><br><span class="line">node -v</span><br><span class="line">npm -v</span><br></pre></td></tr></table></figure>
 
@@ -316,35 +306,25 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># 有git和Node.js环境前提下，安装hexo客户端</span><br><span class="line">sudo npm install hexo-cli -g</span><br><span class="line"></span><br><span class="line"># 需要备份的机器将blog源码备份仓库克隆到本地</span><br><span class="line">git clone xxx ./blogbackup</span><br><span class="line"></span><br><span class="line"># 安装包</span><br><span class="line">cd blogbackup</span><br><span class="line">npm install</span><br><span class="line">npm install hexo-deployer-git --save</span><br><span class="line"></span><br><span class="line"># 以上操作只需要进行一次，后面备份仓库有新的，直接pull下来就好</span><br><span class="line"></span><br><span class="line"># 生成博客、预览</span><br><span class="line">hexo clean &amp;&amp; hexo g &amp;&amp; hexo s</span><br></pre></td></tr></table></figure></li>
 </ol>
 
+      
     </div>
 
     
     
     
-
       <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/%E5%8D%9A%E5%AE%A2/" rel="tag"># 博客</a>
-              <a href="/tags/hexo/" rel="tag"># hexo</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item"></div>
-      <div class="post-nav-item">
-    <a href="/2022/11/05/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4linux100%E8%AE%B2/" rel="next" title="极客时间linux100讲">
-      极客时间linux100讲 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
+        <div class="post-eof"></div>
       </footer>
-    
   </article>
   
   
   
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
 
 
 
@@ -396,7 +376,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-hexo%E5%89%8D%E6%8F%90"><span class="nav-number">1.</span> <span class="nav-text">安装 hexo前提</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85git"><span class="nav-number">1.1.</span> <span class="nav-text">安装git</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Node-js"><span class="nav-number">1.2.</span> <span class="nav-text">安装Node.js</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%9A%E5%AE%A2%E7%9B%B8%E5%85%B3%E6%96%87%E6%A1%A3"><span class="nav-number">1.3.</span> <span class="nav-text">博客相关文档</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hexo%E5%BB%BA%E7%AB%99"><span class="nav-number">2.</span> <span class="nav-text">hexo建站</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B0%86-Hexo-%E9%83%A8%E7%BD%B2%E5%88%B0-GitHub-Pages"><span class="nav-number">3.</span> <span class="nav-text">将 Hexo 部署到 GitHub Pages</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#GitHub%E6%93%8D%E4%BD%9C"><span class="nav-number">3.1.</span> <span class="nav-text">GitHub操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hexo%E6%93%8D%E4%BD%9C"><span class="nav-number">3.2.</span> <span class="nav-text">hexo操作</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8D%A2%E4%B8%BB%E9%A2%98%E6%A0%B7%E5%BC%8F-%E6%8D%A2%E6%88%90next%E4%B8%BB%E9%A2%98"><span class="nav-number">4.</span> <span class="nav-text">换主题样式(换成next主题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E7%94%A8%E4%B8%BB%E9%A2%98"><span class="nav-number">4.1.</span> <span class="nav-text">启用主题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%BB%E9%A2%98%E6%A0%B7%E5%BC%8F%E4%B8%BA%E7%AC%AC%E5%9B%9B%E4%B8%AA"><span class="nav-number">4.2.</span> <span class="nav-text">修改主题配置文件的主题样式为第四个</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E5%8D%9A%E5%AE%A2%E4%BE%A7%E6%A0%8F%E5%B8%83%E5%B1%80"><span class="nav-number">4.3.</span> <span class="nav-text">修改博客侧栏布局</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEabout%E3%80%81tags-%E3%80%81-categories"><span class="nav-number">4.4.</span> <span class="nav-text">配置about、tags 、 categories</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%91%E5%B8%83%E6%96%87%E7%AB%A0"><span class="nav-number">5.</span> <span class="nav-text">发布文章</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BE%A7%E6%A0%8F%E7%A4%BE%E4%BA%A4%E9%93%BE%E6%8E%A5"><span class="nav-number">6.</span> <span class="nav-text">侧栏社交链接</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E4%B8%AA%E4%BA%BA%E4%BF%A1%E6%81%AF"><span class="nav-number">7.</span> <span class="nav-text">修改个人信息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hexo%E5%8D%9A%E5%AE%A2%E5%A4%87%E4%BB%BD"><span class="nav-number">8.</span> <span class="nav-text">hexo博客备份</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
