@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="概述特点： 数据结构是 key-value 键值对，存储在内存中 支持持久化 五大数据结构 支持集群， 主从同步 支持发布&#x2F;订阅模式  应用场景： 分担关系型数据库的读写IO压力 作为数据共享中间件，如Session 不同数据结构的特性应用：     应用场景 数据结构    最新N个数据 通过List按照时间排序   统计TopN zset有序集合   时效性数据，比如验证码 Expi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis">
+<meta property="og:url" content="http://example.com/2022/12/04/Redis/index.html">
+<meta property="og:site_name" content="阿睿的博客">
+<meta property="og:description" content="概述特点： 数据结构是 key-value 键值对，存储在内存中 支持持久化 五大数据结构 支持集群， 主从同步 支持发布&#x2F;订阅模式  应用场景： 分担关系型数据库的读写IO压力 作为数据共享中间件，如Session 不同数据结构的特性应用：     应用场景 数据结构    最新N个数据 通过List按照时间排序   统计TopN zset有序集合   时效性数据，比如验证码 Expi">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221202211416896.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221202211354594.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221202211314138.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221204144340091.png">
+<meta property="article:published_time" content="2022-12-04T14:01:02.000Z">
+<meta property="article:modified_time" content="2022-12-04T14:03:28.046Z">
+<meta property="article:author" content="arui zhong">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221202211416896.png">
+
+<link rel="canonical" href="http://example.com/2022/12/04/Redis/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Redis | 阿睿的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">阿睿的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">keep going>>></p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/04/Redis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="arui zhong">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="阿睿的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Redis
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-12-04 22:01:02 / 修改时间：22:03:28" itemprop="dateCreated datePublished" datetime="2022-12-04T22:01:02+08:00">2022-12-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="特点："><a href="#特点：" class="headerlink" title="特点："></a>特点：</h2><ul>
+<li>数据结构是 <code>key-value</code> 键值对，存储在内存中</li>
+<li>支持持久化</li>
+<li>五大数据结构</li>
+<li>支持集群， 主从同步</li>
+<li>支持发布&#x2F;订阅模式</li>
+</ul>
+<h2 id="应用场景："><a href="#应用场景：" class="headerlink" title="应用场景："></a>应用场景：</h2><ul>
+<li>分担关系型数据库的读写IO压力</li>
+<li>作为数据共享中间件，如Session</li>
+<li>不同数据结构的特性应用：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>应用场景</th>
+<th>数据结构</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>最新N个数据</td>
+<td>通过List按照时间排序</td>
+</tr>
+<tr>
+<td>统计TopN</td>
+<td>zset有序集合</td>
+</tr>
+<tr>
+<td>时效性数据，比如验证码</td>
+<td>Expire 过期命令</td>
+</tr>
+<tr>
+<td>计数器，秒杀</td>
+<td>原子性方法，incr和decr</td>
+</tr>
+<tr>
+<td>保证数据的唯一性</td>
+<td>set结构存储</td>
+</tr>
+<tr>
+<td>构建队列</td>
+<td>list</td>
+</tr>
+<tr>
+<td>发布订阅系统</td>
+<td>pub&#x2F;sub 模式</td>
+</tr>
+</tbody></table>
+<h1 id="命令："><a href="#命令：" class="headerlink" title="命令："></a>命令：</h1><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>redis-server [redis.conf]</td>
+<td>启动redis服务器</td>
+</tr>
+<tr>
+<td>redis-cli shutdown</td>
+<td>关闭redis服务器</td>
+</tr>
+<tr>
+<td>redis-cli [-h hostIP -p 6379 -a 密码]</td>
+<td>启动客户端</td>
+</tr>
+<tr>
+<td>exit</td>
+<td>退出客户端</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>select 1</td>
+<td>切换到数据库1</td>
+</tr>
+<tr>
+<td>dbsize</td>
+<td>查看当前数据库的key的数量</td>
+</tr>
+<tr>
+<td>flushdb</td>
+<td>清空当前库</td>
+</tr>
+<tr>
+<td>flushall</td>
+<td>清空所有的库</td>
+</tr>
+</tbody></table>
+<h1 id="五大数据结构"><a href="#五大数据结构" class="headerlink" title="五大数据结构"></a>五大数据结构</h1><p>redis的键值对，<code>key</code> 是String类型，五大数据类型是指 <code>value</code> </p>
+<h2 id="redis键-key"><a href="#redis键-key" class="headerlink" title="redis键 key"></a>redis键 key</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>keys *</td>
+<td>展示所有的键</td>
+</tr>
+<tr>
+<td>exists k1</td>
+<td>查询键： k1是否存在；返回1存在，0不存在</td>
+</tr>
+<tr>
+<td>type k1</td>
+<td>根据key查询value的数据结构类型</td>
+</tr>
+<tr>
+<td>del key</td>
+<td>删除指定的key及其数据（直接删除</td>
+</tr>
+<tr>
+<td>unlink key</td>
+<td>仅将key从keyspace元数据中删除，真正的删除在后续的异步操作</td>
+</tr>
+<tr>
+<td>expire key 10</td>
+<td>设定key的过期时间为10秒</td>
+</tr>
+<tr>
+<td>ttl key</td>
+<td>查询key的剩余时间（最终值-2，表示已过期）</td>
+</tr>
+</tbody></table>
+<h2 id="String-字符串"><a href="#String-字符串" class="headerlink" title="String 字符串"></a>String 字符串</h2><h3 id="概述："><a href="#概述：" class="headerlink" title="概述："></a>概述：</h3><ul>
+<li>redis中String是最基本的数据类型，</li>
+<li>是二进制安全的，可以将存储任意类型的数据以字符串的形式存储</li>
+<li>对应的Value最大可存 512M</li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221202211416896.png" alt="image-20221202211416896"></p>
+<h3 id="操作命令："><a href="#操作命令：" class="headerlink" title="操作命令："></a>操作命令：</h3><p>incr和decr都是原子操作，因为redis的操作是单线程的，避免了多线程的打断情况</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set k1 v1 [ex seconds | px milseconds] [nx | xx]</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>设置命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>set k1 v1</td>
+<td>添加键为k1，值为v2的数据（有相同的键，新value会覆盖旧值）</td>
+</tr>
+<tr>
+<td>setnx k1 v1</td>
+<td>添加数据，当已有k1时候，不会添加成功</td>
+</tr>
+<tr>
+<td>setex k1 过期时间 v1</td>
+<td>添加键值对，同时设置过期时间，单位为秒</td>
+</tr>
+<tr>
+<td>mset k1 v1 k2 v2</td>
+<td>添加多个键值对</td>
+</tr>
+<tr>
+<td>msetnx k1 v1 k2 v2</td>
+<td>添加多个键值对（键必须都是新值，否则全部失败，原子性操作）</td>
+</tr>
+<tr>
+<td>setrange k1 index word</td>
+<td>将word在 [index, end]的范围 开始覆盖原value</td>
+</tr>
+<tr>
+<td>set k1 v2 xx</td>
+<td>将k1覆盖，必须当k1存在时才操作</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>查询命令</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>get k1</td>
+<td>获取数据</td>
+</tr>
+<tr>
+<td>mget k1 k2</td>
+<td>获取多个value</td>
+</tr>
+<tr>
+<td>getset k1 v1</td>
+<td>设置新值，同时返回旧的value</td>
+</tr>
+<tr>
+<td>getrange k1 start end</td>
+<td>截取value，[startIndex, endIndex] 前包后包，（索引0开始）</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>append k1 abc</td>
+<td>追加数据 abc（并返回新值的总长度）</td>
+</tr>
+<tr>
+<td>strlen k1</td>
+<td>获得value的长度</td>
+</tr>
+<tr>
+<td>incr k1</td>
+<td>将 key 中储存的数字值增1（原子性操作</td>
+</tr>
+<tr>
+<td>decr k1</td>
+<td>将 key 中储存的数字值-1（原子性操作</td>
+</tr>
+<tr>
+<td>incrby &#x2F; decrby k1 步长</td>
+<td>对数值 加或减 指定步长（原子性操作</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="数据结构："><a href="#数据结构：" class="headerlink" title="数据结构："></a>数据结构：</h3><ul>
+<li><code>String</code> 的数据结构为简单动态字符串(<code>Simple Dynamic String,缩写 SDS</code>)。是可以修改的字符串内部结构，实现上类似于 Java 的 <code>ArrayList</code>，采用预分配冗余空间的方式 来减少内存的频繁分配.</li>
+<li>内部为当前字符串实际分配的空间 <code>capacity</code> 一般要高于实际字符串长度 len。当字符串长度小于 1M 时，扩容都是加倍现有的空间，如果超过 1M，扩容时一次只会多扩 1M 的空间。需要注意的是字符串最大长度为 512M。</li>
+</ul>
+<h2 id="list列表"><a href="#list列表" class="headerlink" title="list列表"></a>list列表</h2><h3 id="概述：-1"><a href="#概述：-1" class="headerlink" title="概述："></a>概述：</h3><ul>
+<li>value为list列表，是单键多值</li>
+<li>元素是可重复的、且有序的（插入顺序，最后插入的在左边，索引为0</li>
+<li>list底层是双向链表，可以以首尾为基准操作元素</li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221202211354594.png" alt="image-20221202211354594"></p>
+<h3 id="操作命令：-1"><a href="#操作命令：-1" class="headerlink" title="操作命令："></a>操作命令：</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">lpush k1 v1 v2 v1 v3  </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">插入顺序从左到右是： v3 v1 v2 v1 ;v3的索引为0</span></span><br><span class="line"></span><br><span class="line">lindex k1 0 </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">返回值是 v3</span></span><br><span class="line"></span><br><span class="line">lrem k1 1 v1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">从左边删除1个v1： 剩下v3 v2 v1</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>lpush &#x2F; rpush k1 v1 v2 v3</td>
+<td>从左边&#x2F;右边插入多个</td>
+</tr>
+<tr>
+<td>lpop &#x2F; rpop k1 [count]</td>
+<td>从左边&#x2F;右边 删除元素；count不填，默认删除1一个元素<br />删完了元素，键也自动删除</td>
+</tr>
+<tr>
+<td>rpoplpush k1 k2</td>
+<td>从k1的右边删除一个元素，并将该元素插入到 k2 的左边</td>
+</tr>
+<tr>
+<td>linsert k1 &lt;before|after&gt; oldV newV</td>
+<td>在oldV左边|右边插入newV</td>
+</tr>
+<tr>
+<td>lset k1 index v1</td>
+<td>将index处的元素替换为 v1</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>lrem k1 n v1</td>
+<td>从左边删除n个v1</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>lrange k1 start end</strong></td>
+<td><code>lrange k1 0 -1</code> 获取k1所有的元素</td>
+</tr>
+<tr>
+<td>lindex k1 index</td>
+<td>根据索引查询元素</td>
+</tr>
+<tr>
+<td>llen k1</td>
+<td>获得k1的列表长度</td>
+</tr>
+</tbody></table>
+<h3 id="数据结构：-1"><a href="#数据结构：-1" class="headerlink" title="数据结构："></a>数据结构：</h3><ul>
+<li>List 的数据结构为快速链表 quickList</li>
+<li>数据较少时候，会使用一块连续的内存存储，是通过 <code>zipList</code> 压缩链表存储</li>
+<li>数据较多时候，Redis 将链表和 ziplist 结合起来组成了 quicklist。也就是将多个 ziplist 使用双向指针串起来使用。这样既满足了快速的插入删除性能，又不会出现太大的空间冗余。</li>
+</ul>
+<h2 id="Set集合"><a href="#Set集合" class="headerlink" title="Set集合"></a>Set集合</h2><h3 id="概述：-2"><a href="#概述：-2" class="headerlink" title="概述："></a>概述：</h3><ul>
+<li>Set集合元素是唯一的</li>
+<li>value是String类型的无序集合</li>
+<li>底层维护的是一个值为null的hash表，crud的复杂度都是O(1)</li>
+</ul>
+<h3 id="操作命令：-2"><a href="#操作命令：-2" class="headerlink" title="操作命令："></a>操作命令：</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>sadd k1 v1 v2</td>
+<td>添加多个元素</td>
+</tr>
+<tr>
+<td>smove k1 k2 v1</td>
+<td>将k1中v1  移动到k2</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>smembers k1</strong></td>
+<td>返回集合中的所有元素</td>
+</tr>
+<tr>
+<td>srandmember k1 [n]</td>
+<td>随机从集合取出n个值（默认是1个），不会删除元素</td>
+</tr>
+<tr>
+<td>sismember k1 v1</td>
+<td>判断v1是否k1中（返回1是，0否）</td>
+</tr>
+<tr>
+<td>scard k1</td>
+<td>返回k1中的集合总个数</td>
+</tr>
+<tr>
+<td>srem k1 v1 v2 v3</td>
+<td>删除多个元素</td>
+</tr>
+<tr>
+<td>spop k1</td>
+<td>随机吐出一个值（并删除</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>sinter k1 k2</td>
+<td>返回两个集合的交集元素（k1 k2都有的部分</td>
+</tr>
+<tr>
+<td>sunion k1 k2</td>
+<td>返回两个集合的并集元素（有去重效果</td>
+</tr>
+<tr>
+<td>sdiff k1 k2</td>
+<td>返回两个集合的差集（k1有的，但k2没有）</td>
+</tr>
+</tbody></table>
+<h2 id="Hash哈希"><a href="#Hash哈希" class="headerlink" title="Hash哈希"></a>Hash哈希</h2><h3 id="概述：-3"><a href="#概述：-3" class="headerlink" title="概述："></a>概述：</h3><ul>
+<li><p>键值对的value部分是是 kv键值对结构，类似Java中的Map结构</p>
+</li>
+<li><p>适合用于存储对象，比如 key为user，value用于存储用户的属性和属性值</p>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221202211314138.png" alt="image-20221202211314138"></p>
+</li>
+</ul>
+<h3 id="操作命令：-3"><a href="#操作命令：-3" class="headerlink" title="操作命令："></a>操作命令：</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>hset k1 f1 v1 f2 v2 f3 v3</td>
+<td>给一个value添加多个属性值</td>
+</tr>
+<tr>
+<td>hsetnx k1 f1 v1</td>
+<td>当k1的属性f1不存在时，才可以添加成功</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>hget k1 f1</td>
+<td>根据键取指定的属性值</td>
+</tr>
+<tr>
+<td>hexists k1 f1</td>
+<td>查某k1的属性值f1是否存在</td>
+</tr>
+<tr>
+<td>hkeys k1</td>
+<td>列出k1所有的属性</td>
+</tr>
+<tr>
+<td>hvals k1</td>
+<td>列出k1所有的属性的值</td>
+</tr>
+<tr>
+<td>hincrby k1 f1 n</td>
+<td>n可以正数或负数</td>
+</tr>
+</tbody></table>
+<h3 id="数据结构：-2"><a href="#数据结构：-2" class="headerlink" title="数据结构："></a>数据结构：</h3><ul>
+<li>数据少时候用的是压缩表<code>zipList</code> </li>
+<li>多时候转为 <code>hashtable</code></li>
+</ul>
+<h2 id="ZSet有序集合"><a href="#ZSet有序集合" class="headerlink" title="ZSet有序集合"></a>ZSet有序集合</h2><h3 id="概述：-4"><a href="#概述：-4" class="headerlink" title="概述："></a>概述：</h3><ul>
+<li><p>key-value ，value是由多个 <code>成员 和评分</code> 组成的；类似hash结构</p>
+</li>
+<li><p>成员唯一，当添加重复的成员，新成员及新评分覆盖旧的数据</p>
+</li>
+<li><p>每个成员都关联一个评分（评分可重复），zset根据评分自动对成员排序（默认返回顺序是升序）</p>
+</li>
+<li><p>可以根据下标访问，但是下标顺序是大小顺序，不是插入顺序</p>
+</li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221204144340091.png" alt="image-20221204144340091"></p>
+<h3 id="操作命令：-4"><a href="#操作命令：-4" class="headerlink" title="操作命令："></a>操作命令：</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>zadd k1 score1 v1 score2 v2</td>
+<td>添加多个成员</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>zrange k1 0 -1 [withscores]</strong></td>
+<td>查询所有成员[及评分]，从小大到排序</td>
+</tr>
+<tr>
+<td>zrangebyscore k1 min max [withscores]</td>
+<td>查询 [minx, max] 评分返回的成员</td>
+</tr>
+<tr>
+<td>zrevrangebyscore k1 min max [withscores]</td>
+<td>返回倒序，查询 [minx, max] 评分返回的成员</td>
+</tr>
+<tr>
+<td>zcount k1 min max</td>
+<td>统计评分在 [min, max] 之间的成员个数</td>
+</tr>
+<tr>
+<td>zrank k1 v1</td>
+<td>查询成员v1的排名，从小到大（0开始</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>zincrby k1 100 jack</td>
+<td>评分操作，jack成员评分 +100（也可以是负数</td>
+</tr>
+<tr>
+<td>zrem k1 v1 v2 v3</td>
+<td>删除多个成员</td>
+</tr>
+</tbody></table>
+<h3 id="数据结构：-3"><a href="#数据结构：-3" class="headerlink" title="数据结构："></a>数据结构：</h3><ul>
+<li>hash将结构，hash将评分和成员关联起来， 保证了成员的唯一性，并可以通过成员映射其评分</li>
+<li>跳跃表， 目的是给元素的value排序，根据score范围查找元素列表<ul>
+<li>跳跃表通过多层的链表，来缩小查询的范围，从而缩小了单链表的查询次数（二分思想</li>
+</ul>
+</li>
+</ul>
+<h1 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h1><h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><h3 id="设置最大内存"><a href="#设置最大内存" class="headerlink" title="设置最大内存"></a>设置最大内存</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">WARNING: If you have replicas attached to an instance with maxmemory on,</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">the size of the output buffers needed to feed the replicas are subtracted</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">from the used memory count, so that network problems / resyncs will</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">not trigger a loop <span class="built_in">where</span> keys are evicted, and <span class="keyword">in</span> turn the output</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">buffer of replicas is full with DELs of keys evicted triggering the deletion</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">of more keys, and so forth until the database is completely emptied.</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># In short... if you have replicas attached it is suggested that you set a lower</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">limit</span> <span class="keyword">for</span> maxmemory so that there is some free RAM on the system <span class="keyword">for</span> replica</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">output buffers (but this is not needed <span class="keyword">if</span> the policy is <span class="string">&#x27;noeviction&#x27;</span>).</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># maxmemory &lt;bytes&gt;</span></span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="设置淘汰策略"><a href="#设置淘汰策略" class="headerlink" title="设置淘汰策略"></a>设置淘汰策略</h3><ul>
+<li>volatile-lru：使用 LRU 算法移除 key，只对设置了过期时间的键；（最近最少使用）</li>
+<li>allkeys-lru：在所有集合 key 中，使用 LRU 算法移除 key </li>
+<li>volatile-random：在过期集合中移除随机的 key，只对设置了过期时间的键 </li>
+<li>allkeys-random：在所有集合 key 中，移除随机的 key </li>
+<li>volatile-ttl：移除那些 TTL 值最小的 key，即那些最近要过期的 key </li>
+<li>noeviction：不进行移除。针对写操作，只是返回错误信息（默认策略）</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">MAXMEMORY POLICY: how Redis will select what to remove when maxmemory</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">is reached. You can select one from the following behaviors:</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># volatile-lru -&gt; Evict using approximated LRU, only keys with an expire set.</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">allkeys-lru -&gt; Evict any key using approximated LRU.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">volatile-lfu -&gt; Evict using approximated LFU, only keys with an expire <span class="built_in">set</span>.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">allkeys-lfu -&gt; Evict any key using approximated LFU.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">volatile-random -&gt; Remove a random key having an expire <span class="built_in">set</span>.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">allkeys-random -&gt; Remove a random key, any key.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">volatile-ttl -&gt; Remove the key with the nearest expire time (minor TTL)</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">noeviction -&gt; Don<span class="string">&#x27;t evict anything, just return an error on write operations.</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="string"></span></span></span><br><span class="line"><span class="string"><span class="language-bash"># LRU means Least Recently Used</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">LFU means Least Frequently Used</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="string"></span></span></span><br><span class="line"><span class="string"><span class="language-bash"># Both LRU, LFU and volatile-ttl are implemented using approximated</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">randomized algorithms.</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="string"></span></span></span><br><span class="line"><span class="string"><span class="language-bash"># Note: with any of the above policies, when there are no suitable keys for</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">eviction, Redis will return an error on write operations that require</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">more memory. These are usually commands that create new keys, add data or</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">modify existing keys. A few examples are: SET, INCR, HSET, LPUSH, SUNIONSTORE,</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">SORT (due to the STORE argument), and EXEC (if the transaction includes any</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">command that requires memory).</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="string"></span></span></span><br><span class="line"><span class="string"><span class="language-bash"># The default is:</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="string"></span></span></span><br><span class="line"><span class="string"><span class="language-bash"># maxmemory-policy noeviction</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="maxmemory-samples"><a href="#maxmemory-samples" class="headerlink" title="maxmemory-samples"></a>maxmemory-samples</h3><ul>
+<li>设置样本数量，LRU 算法和最小 TTL 算法都并非是精确的算法，而是估算值，所以你可以设置样本的大小，redis 默认会检查这么多个 key 并选择其中 LRU 的那个</li>
+<li>一般设置 3 到 7 的数字，数值越小样本越不准确，但性能消耗越小。</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">LRU, LFU and minimal TTL algorithms are not precise algorithms but approximated</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">algorithms (<span class="keyword">in</span> order to save memory), so you can tune it <span class="keyword">for</span> speed or</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">accuracy. By default Redis will check five keys and pick the one that was</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">used least recently, you can change the sample size using the following</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">configuration directive.</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># The default of 5 produces good enough results. 10 Approximates very closely</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="literal">true</span> LRU but costs more CPU. 3 is faster but not very accurate.</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># maxmemory-samples 5</span></span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Redis的发布订阅"><a href="#Redis的发布订阅" class="headerlink" title="Redis的发布订阅"></a>Redis的发布订阅</h1><h2 id="概念："><a href="#概念：" class="headerlink" title="概念："></a>概念：</h2><ul>
+<li>Redis 发布订阅 (pub&#x2F;sub) 是一种消息通信模式：发送者 (pub) 发送消息，订阅者 (sub) 接收消息。</li>
+<li>Redis 客户端可以订阅任意数量的频道。</li>
+</ul>
+<h2 id="操作："><a href="#操作：" class="headerlink" title="操作："></a>操作：</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">订阅频道</span></span><br><span class="line">SUBSCRIBE channel1 channel2</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">发布信息， 返回整数（多少个订阅者接收了）</span></span><br><span class="line">PUBLISH channel1 helloworld</span><br></pre></td></tr></table></figure>
+
+<h1 id="Redis-Jedis"><a href="#Redis-Jedis" class="headerlink" title="Redis_Jedis"></a>Redis_Jedis</h1><h2 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--jedis依赖--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>redis.clients<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jedis<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.2.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> redis.clients.jedis.Jedis;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * jedis连接redis服务器</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * 密码连接</span></span><br><span class="line"><span class="comment"> * jedis.auth(&quot;123456&quot;);</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> arui</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Demo00_connect</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Jedis</span> <span class="variable">jedis</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Jedis</span>(<span class="string">&quot;localhost&quot;</span>, <span class="number">6379</span>);</span><br><span class="line">        <span class="type">String</span> <span class="variable">pong</span> <span class="operator">=</span> jedis.ping();</span><br><span class="line">        System.out.println(<span class="string">&quot;连接成功: &quot;</span>  + pong);</span><br><span class="line">        jedis.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Key操作"><a href="#Key操作" class="headerlink" title="Key操作"></a>Key操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 查询所有的key</span></span><br><span class="line">Set&lt;String&gt; keys = jedis.keys(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">System.out.println(keys);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断k1是否存在</span></span><br><span class="line"><span class="type">Boolean</span> <span class="variable">exists</span> <span class="operator">=</span> jedis.exists(<span class="string">&quot;k1&quot;</span>);</span><br><span class="line">System.out.println(exists);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ttl</span></span><br><span class="line"><span class="type">Long</span> <span class="variable">ttl</span> <span class="operator">=</span> jedis.ttl(<span class="string">&quot;k1&quot;</span>);</span><br><span class="line">System.out.println(ttl);</span><br><span class="line"></span><br><span class="line"><span class="comment">// get</span></span><br><span class="line"><span class="type">String</span> <span class="variable">v1</span> <span class="operator">=</span> jedis.get(<span class="string">&quot;k1&quot;</span>);</span><br><span class="line">System.out.println(v1);</span><br></pre></td></tr></table></figure>
+
+<h2 id="String-操作"><a href="#String-操作" class="headerlink" title="String 操作"></a>String 操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// String同时添加多个kv</span></span><br><span class="line"><span class="type">String</span> <span class="variable">mset</span> <span class="operator">=</span> jedis.mset(<span class="string">&quot;stu1&quot;</span>, <span class="string">&quot;jack&quot;</span>, <span class="string">&quot;stu2&quot;</span>, <span class="string">&quot;mike&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询多个值</span></span><br><span class="line">List&lt;String&gt; list = jedis.mget(<span class="string">&quot;stu1&quot;</span>, <span class="string">&quot;stu2&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="List操作"><a href="#List操作" class="headerlink" title="List操作"></a>List操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 插入多个value, 返回值是成功插入个数</span></span><br><span class="line"><span class="type">Long</span> <span class="variable">lpush</span> <span class="operator">=</span> jedis.lpush(<span class="string">&quot;students&quot;</span>, <span class="string">&quot;jack&quot;</span>, <span class="string">&quot;mike&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询list</span></span><br><span class="line">List&lt;String&gt; students = jedis.lrange(<span class="string">&quot;students&quot;</span>, <span class="number">0</span>, -<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Set操作"><a href="#Set操作" class="headerlink" title="Set操作"></a>Set操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 成功插入2个</span></span><br><span class="line"><span class="type">Long</span> <span class="variable">count</span> <span class="operator">=</span> jedis.sadd(<span class="string">&quot;id&quot;</span>, <span class="string">&quot;123&quot;</span>, <span class="string">&quot;123&quot;</span>, <span class="string">&quot;321&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询</span></span><br><span class="line">Set&lt;String&gt; ids = jedis.smembers(<span class="string">&quot;id&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Hash操作"><a href="#Hash操作" class="headerlink" title="Hash操作"></a>Hash操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, String&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">map.put(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;jack&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;age&quot;</span>, <span class="string">&quot;22&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;gender&quot;</span>, <span class="string">&quot;male&quot;</span>);</span><br><span class="line"><span class="comment">// hmset 可以添加多个属性； hset 只能添加一个属性</span></span><br><span class="line">jedis.hmset(<span class="string">&quot;user&quot;</span>, map);</span><br><span class="line"></span><br><span class="line">Map&lt;String, String&gt; map1 = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">map1.put(<span class="string">&quot;hello&quot;</span>, <span class="string">&quot;world&quot;</span>);</span><br><span class="line">jedis.hset(<span class="string">&quot;user&quot;</span>, map1);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询user所有的属性值</span></span><br><span class="line">List&lt;String&gt; list = jedis.hvals(<span class="string">&quot;user&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="ZSet操作"><a href="#ZSet操作" class="headerlink" title="ZSet操作"></a>ZSet操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, Double&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">map.put(<span class="string">&quot;jack&quot;</span>, <span class="number">90.0</span>);</span><br><span class="line">map.put(<span class="string">&quot;mike&quot;</span>, <span class="number">100.0</span>);</span><br><span class="line"><span class="comment">// 添加多个成员 zadd(String key, Map&lt;String, Double&gt; scoreMembers)</span></span><br><span class="line">jedis.zadd(<span class="string">&quot;tpn&quot;</span>, map);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加单个成员</span></span><br><span class="line">jedis.zadd(<span class="string">&quot;tpn&quot;</span>, <span class="number">70</span>, <span class="string">&quot;rose&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询</span></span><br><span class="line">Set&lt;String&gt; list = jedis.zrange(<span class="string">&quot;tpn&quot;</span>, <span class="number">0</span>, -<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<h1 id="Redis-SpringBoot"><a href="#Redis-SpringBoot" class="headerlink" title="Redis_SpringBoot"></a>Redis_SpringBoot</h1><h2 id="api封装"><a href="#api封装" class="headerlink" title="api封装"></a>api封装</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">opsForValue --&gt; String操作</span><br><span class="line">opsForList --&gt; List操作</span><br><span class="line">opsForHash --&gt; Hash操作</span><br><span class="line">opsForSet --&gt; Set操作</span><br><span class="line">opsForZSet --&gt; ZSet操作</span><br></pre></td></tr></table></figure>
+
+<h2 id="依赖-1"><a href="#依赖-1" class="headerlink" title="依赖"></a>依赖</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-data-redis<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 连接池--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.commons<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>commons-pool2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.6.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.fasterxml.jackson.annotation.JsonAutoDetect;</span><br><span class="line"><span class="keyword">import</span> com.fasterxml.jackson.annotation.PropertyAccessor;</span><br><span class="line"><span class="keyword">import</span> com.fasterxml.jackson.databind.ObjectMapper;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cache.CacheManager;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cache.annotation.CachingConfigurerSupport;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cache.annotation.EnableCaching;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Bean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Configuration;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.cache.RedisCacheConfiguration;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.cache.RedisCacheManager;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.connection.RedisConnectionFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.core.RedisTemplate;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.serializer.RedisSerializationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.serializer.RedisSerializer;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.serializer.StringRedisSerializer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"></span><br><span class="line"><span class="meta">@EnableCaching</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RedisConfig</span> <span class="keyword">extends</span> <span class="title class_">CachingConfigurerSupport</span> &#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> RedisTemplate&lt;String, Object&gt; <span class="title function_">redisTemplate</span><span class="params">(RedisConnectionFactory factory)</span> &#123;</span><br><span class="line">        RedisTemplate&lt;String, Object&gt; template = <span class="keyword">new</span> <span class="title class_">RedisTemplate</span>&lt;&gt;();</span><br><span class="line">        RedisSerializer&lt;String&gt; redisSerializer = <span class="keyword">new</span> <span class="title class_">StringRedisSerializer</span>();</span><br><span class="line">        <span class="type">Jackson2JsonRedisSerializer</span> <span class="variable">jackson2JsonRedisSerializer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Jackson2JsonRedisSerializer</span>(Object.class);</span><br><span class="line">        <span class="type">ObjectMapper</span> <span class="variable">om</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectMapper</span>();</span><br><span class="line">        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);</span><br><span class="line">        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);</span><br><span class="line">        jackson2JsonRedisSerializer.setObjectMapper(om);</span><br><span class="line">        template.setConnectionFactory(factory);</span><br><span class="line">        <span class="comment">//key 序列化方式</span></span><br><span class="line">        template.setKeySerializer(redisSerializer);</span><br><span class="line">        <span class="comment">//value 序列化</span></span><br><span class="line">        template.setValueSerializer(jackson2JsonRedisSerializer);</span><br><span class="line">        <span class="comment">//value hashmap 序列化</span></span><br><span class="line">        template.setHashValueSerializer(jackson2JsonRedisSerializer);</span><br><span class="line">        <span class="keyword">return</span> template;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> CacheManager <span class="title function_">cacheManager</span><span class="params">(RedisConnectionFactory factory)</span> &#123;</span><br><span class="line">        RedisSerializer&lt;String&gt; redisSerializer = <span class="keyword">new</span> <span class="title class_">StringRedisSerializer</span>();</span><br><span class="line">        <span class="type">Jackson2JsonRedisSerializer</span> <span class="variable">jackson2JsonRedisSerializer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Jackson2JsonRedisSerializer</span>(Object.class);</span><br><span class="line">        <span class="comment">//解决查询缓存转换异常的问题</span></span><br><span class="line">        <span class="type">ObjectMapper</span> <span class="variable">om</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectMapper</span>();</span><br><span class="line">        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);</span><br><span class="line">        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);</span><br><span class="line">        jackson2JsonRedisSerializer.setObjectMapper(om);</span><br><span class="line">        <span class="comment">// 配置序列化（解决乱码的问题）,过期时间 600 秒</span></span><br><span class="line">        <span class="type">RedisCacheConfiguration</span> <span class="variable">config</span> <span class="operator">=</span></span><br><span class="line">                RedisCacheConfiguration.defaultCacheConfig()</span><br><span class="line">                        .entryTtl(Duration.ofSeconds(<span class="number">600</span>))</span><br><span class="line">                        .serializeKeysWith(RedisSerializationContext.SerializationPair.</span><br><span class="line">                                fromSerializer(redisSerializer))</span><br><span class="line">                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer))</span><br><span class="line">                        .disableCachingNullValues();</span><br><span class="line">        <span class="type">RedisCacheManager</span> <span class="variable">cacheManager</span> <span class="operator">=</span> RedisCacheManager.builder(factory)</span><br><span class="line">                .cacheDefaults(config)</span><br><span class="line">                .build();</span><br><span class="line">        <span class="keyword">return</span> cacheManager;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="控制器"><a href="#控制器" class="headerlink" title="控制器"></a>控制器</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * redis控制器</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> arui</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/redis&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RedisTestController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisTemplate redisTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">testRedis</span><span class="params">()</span>&#123;</span><br><span class="line">        redisTemplate.opsForValue().set(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;jack&quot;</span>);</span><br><span class="line">        <span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> (String) redisTemplate.opsForValue().get(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Redis/" rel="tag"># Redis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/28/JUC%E5%85%A5%E9%97%A8/" rel="prev" title="JUC入门">
+      <i class="fa fa-chevron-left"></i> JUC入门
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E7%82%B9%EF%BC%9A"><span class="nav-number">1.1.</span> <span class="nav-text">特点：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF%EF%BC%9A"><span class="nav-number">1.2.</span> <span class="nav-text">应用场景：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">命令：</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">五大数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#redis%E9%94%AE-key"><span class="nav-number">3.1.</span> <span class="nav-text">redis键 key</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#String-%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">3.2.</span> <span class="nav-text">String 字符串</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%EF%BC%9A"><span class="nav-number">3.2.1.</span> <span class="nav-text">概述：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4%EF%BC%9A"><span class="nav-number">3.2.2.</span> <span class="nav-text">操作命令：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%EF%BC%9A"><span class="nav-number">3.2.3.</span> <span class="nav-text">数据结构：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#list%E5%88%97%E8%A1%A8"><span class="nav-number">3.3.</span> <span class="nav-text">list列表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%EF%BC%9A-1"><span class="nav-number">3.3.1.</span> <span class="nav-text">概述：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4%EF%BC%9A-1"><span class="nav-number">3.3.2.</span> <span class="nav-text">操作命令：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%EF%BC%9A-1"><span class="nav-number">3.3.3.</span> <span class="nav-text">数据结构：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Set%E9%9B%86%E5%90%88"><span class="nav-number">3.4.</span> <span class="nav-text">Set集合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%EF%BC%9A-2"><span class="nav-number">3.4.1.</span> <span class="nav-text">概述：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4%EF%BC%9A-2"><span class="nav-number">3.4.2.</span> <span class="nav-text">操作命令：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hash%E5%93%88%E5%B8%8C"><span class="nav-number">3.5.</span> <span class="nav-text">Hash哈希</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%EF%BC%9A-3"><span class="nav-number">3.5.1.</span> <span class="nav-text">概述：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4%EF%BC%9A-3"><span class="nav-number">3.5.2.</span> <span class="nav-text">操作命令：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%EF%BC%9A-2"><span class="nav-number">3.5.3.</span> <span class="nav-text">数据结构：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ZSet%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88"><span class="nav-number">3.6.</span> <span class="nav-text">ZSet有序集合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%EF%BC%9A-4"><span class="nav-number">3.6.1.</span> <span class="nav-text">概述：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4%EF%BC%9A-4"><span class="nav-number">3.6.2.</span> <span class="nav-text">操作命令：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%EF%BC%9A-3"><span class="nav-number">3.6.3.</span> <span class="nav-text">数据结构：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">配置文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="nav-number">4.1.</span> <span class="nav-text">内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E6%9C%80%E5%A4%A7%E5%86%85%E5%AD%98"><span class="nav-number">4.1.1.</span> <span class="nav-text">设置最大内存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5"><span class="nav-number">4.1.2.</span> <span class="nav-text">设置淘汰策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#maxmemory-samples"><span class="nav-number">4.1.3.</span> <span class="nav-text">maxmemory-samples</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis%E7%9A%84%E5%8F%91%E5%B8%83%E8%AE%A2%E9%98%85"><span class="nav-number">5.</span> <span class="nav-text">Redis的发布订阅</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%EF%BC%9A"><span class="nav-number">5.1.</span> <span class="nav-text">概念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%EF%BC%9A"><span class="nav-number">5.2.</span> <span class="nav-text">操作：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis-Jedis"><span class="nav-number">6.</span> <span class="nav-text">Redis_Jedis</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96"><span class="nav-number">6.1.</span> <span class="nav-text">依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5"><span class="nav-number">6.2.</span> <span class="nav-text">连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Key%E6%93%8D%E4%BD%9C"><span class="nav-number">6.3.</span> <span class="nav-text">Key操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#String-%E6%93%8D%E4%BD%9C"><span class="nav-number">6.4.</span> <span class="nav-text">String 操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#List%E6%93%8D%E4%BD%9C"><span class="nav-number">6.5.</span> <span class="nav-text">List操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Set%E6%93%8D%E4%BD%9C"><span class="nav-number">6.6.</span> <span class="nav-text">Set操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hash%E6%93%8D%E4%BD%9C"><span class="nav-number">6.7.</span> <span class="nav-text">Hash操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ZSet%E6%93%8D%E4%BD%9C"><span class="nav-number">6.8.</span> <span class="nav-text">ZSet操作</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis-SpringBoot"><span class="nav-number">7.</span> <span class="nav-text">Redis_SpringBoot</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#api%E5%B0%81%E8%A3%85"><span class="nav-number">7.1.</span> <span class="nav-text">api封装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96-1"><span class="nav-number">7.2.</span> <span class="nav-text">依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">7.3.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="nav-number">7.4.</span> <span class="nav-text">控制器</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">arui zhong</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/aruizhong" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;aruizhong" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:aruizhong@163.com" title="E-Mail → mailto:aruizhong@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">arui zhong</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

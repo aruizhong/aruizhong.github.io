@@ -161,6 +161,649 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/05/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4linux100%E8%AE%B2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="arui zhong">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="阿睿的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/11/05/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4linux100%E8%AE%B2/" class="post-title-link" itemprop="url">极客时间linux100讲</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-05 20:43:40" itemprop="dateCreated datePublished" datetime="2022-11-05T20:43:40+08:00">2022-11-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-14 23:43:19" itemprop="dateModified" datetime="2022-11-14T23:43:19+08:00">2022-11-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="系统操作"><a href="#系统操作" class="headerlink" title="系统操作"></a>系统操作</h1><h2 id="帮助命令-man-help-info"><a href="#帮助命令-man-help-info" class="headerlink" title="帮助命令 man help info"></a>帮助命令 man help info</h2><ul>
+<li><p><code>man</code> </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">man ls</span><br><span class="line"></span><br><span class="line">man 7 man</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看第7章</span></span><br><span class="line">yum install man man-pages -y</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>help</code> </p>
+<p>shell自带的命令称为内部命令，其他的是外部命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">内部命令</span></span><br><span class="line">help cd</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">外部命令</span></span><br><span class="line">ls --help</span><br><span class="line"></span><br><span class="line">type cd </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可以查看是否内部命令</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>info</code> ， info比help更详细，作为help的帮助</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">info ls</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="基本操作命令"><a href="#基本操作命令" class="headerlink" title="基本操作命令"></a>基本操作命令</h2><ul>
+<li><p><code>pwd</code>  显示当前的目录名称</p>
+</li>
+<li><p><code>ls</code>  文件查看</p>
+</li>
+<li><p><code>cd</code>  更改当前的操作目录  </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">来回切换目录</span></span><br><span class="line">cd - </span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>mkdir</code> 创建目录 ， <code>rm</code> 删除</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果存在不报错，创建多级目录</span></span><br><span class="line">mkdir -p a/b</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>cp</code> 复制， <code>mv</code> 移动</p>
+</li>
+<li><p><code>cat</code> 显示文本到结尾，<code>head</code> 查看开头默认10行， <code>tail</code> 查看结尾， <code>wc</code> 统计文件内容信息</p>
+</li>
+<li><p><code>tar</code> 打包命令</p>
+<p>参数：<code>c</code> 打包，<code>x</code> 解包 ，<code>f</code> 指定操作类型为文件 ， <code>z</code> gzip格式压缩和解压缩 ， <code>j</code> bzip格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将/etc目录打包成到 /tmp/etc-backup.tar</span></span><br><span class="line">tar -cf /tmp/etc-backup.tar /etc</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">打包压缩成gzip格式</span> </span><br><span class="line">tar -zcvf /tmp/etc-backup.tar.gz /etc</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">解压到<span class="built_in">test</span>目录下，<span class="built_in">test</span>目录必须先存在</span></span><br><span class="line">tar -zxvf xxxx.tar.gz -C ./test</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="vi编辑器"><a href="#vi编辑器" class="headerlink" title="vi编辑器"></a>vi编辑器</h2><ol>
+<li><p>正常模式 按esc</p>
+<ul>
+<li><code>hjkl </code>  光标左下上右</li>
+<li><code>yy </code>  复制 ；<code>2yy</code> 复制2行，包括光标所在行</li>
+<li><code>dd</code> 剪切</li>
+<li><code>p</code>  粘贴</li>
+<li><code>u</code>  撤销</li>
+<li><code>x</code>  删除单个字符</li>
+<li><code>r</code>  替换单个字符</li>
+<li><code>gg</code> 移动到第一行</li>
+<li><code>G</code> 移动最后一行； <code>100G</code> 移动第100行</li>
+<li><code>^</code> 移动到行首，<code>$</code> 移动到行尾</li>
+</ul>
+</li>
+<li><p>插入模式 按i等</p>
+<ul>
+<li><code>I</code> 进入最左侧</li>
+<li><code>a</code>  进入光标右边一位</li>
+<li><code>A</code> 进入最右侧</li>
+<li><code>o</code> 进入光标下一行</li>
+<li><code>O</code> 进入光标上一行</li>
+</ul>
+</li>
+<li><p>命令模式 按：</p>
+<ul>
+<li><p><code>:/</code> 查找， <code>n</code> 下一个， <code>N</code> 上一个</p>
+</li>
+<li><p><code>:s/old/new</code> 替换 </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">光标所在行查找，并替换第一个</span></span><br><span class="line">:s/old/new</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">所有行查找，替换所有行的第一个</span></span><br><span class="line">:%s/old/new</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">全局替换</span> </span><br><span class="line">:%s/old/new/g</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第3到第5行替换</span></span><br><span class="line">:%3,5s/old/new</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>:%d</code>  删除所有行， <code>:1,3d</code> 删除1到3行</p>
+</li>
+<li><p><code>:!</code> 执行shell命令</p>
+</li>
+<li><p><code>:set</code> 设置命令</p>
+</li>
+</ul>
+</li>
+<li><p>可视模式 按v</p>
+<ul>
+<li><p><code>v</code>  字符可视模式</p>
+</li>
+<li><p><code>V</code> 行可视模式</p>
+</li>
+<li><p>ctrl+v 块可视模式（vim才支持，vi不支持</p>
+<p>类似列操作，光标先拉列，大写<code>I</code> 插入，连续两次按 <code>esc</code> 键</p>
+<p>小写<code>d</code> ，删除</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="用户管理"><a href="#用户管理" class="headerlink" title="用户管理"></a>用户管理</h2><ul>
+<li><p>用户管理常用命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">useradd 新建用户</span><br><span class="line">userdel 删除用户 userdel -r xx 彻底删除</span><br><span class="line">passwd 修改用户密码</span><br><span class="line">usermod 修改用户属性 usermod -g group1 user1 # 将user1改到用户组group1下</span><br><span class="line">chage 修改用户属性</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">验证是否有哪个用户</span></span><br><span class="line">id root</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">uid=0(root) gid=0(root) 组=0(root)</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>组管理命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">groupadd groupName</span><br><span class="line">groupdel groupName</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>可以通过 <code>visudo</code> 命令或者编辑  <code>/etc/sudoers</code> 文件 ， 赋予普通用户特殊权限 sudo</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">arui ALL=(ALL) NOPASSWD:ALL</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">%</span><span class="language-bash">arui 表示用户组； arui表示用户</span></span><br><span class="line">All 表示所有的连接</span><br><span class="line">(ALL) 表示所有的操作</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="文件权限"><a href="#文件权限" class="headerlink" title="文件权限"></a>文件权限</h2><ul>
+<li><p>r 读 4</p>
+</li>
+<li><p>w 写 2</p>
+</li>
+<li><p>x 执行 1</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">u g o a是所有</span></span><br><span class="line">chmod u+x 文件或目录名 </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改属用户</span></span><br><span class="line">chown user1 文件或目录名  </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改属组</span></span><br><span class="line">chown :group1 文件或目录名 </span><br><span class="line">chgrp group1 文件或目录名</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="目录权限"><a href="#目录权限" class="headerlink" title="目录权限"></a>目录权限</h2><ul>
+<li>x 进入目录</li>
+<li>rx 显示目录内的文件名</li>
+<li>wx 修改目录内的文件名</li>
+</ul>
+<h1 id="系统管理"><a href="#系统管理" class="headerlink" title="系统管理"></a>系统管理</h1><h2 id="网络故障排除"><a href="#网络故障排除" class="headerlink" title="网络故障排除"></a>网络故障排除</h2><ul>
+<li><p>ping 网络是否通</p>
+</li>
+<li><p>traceroute 网络质量</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceroute -w 1 baidu.com # 只等待1秒</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>mtr 网络质量</p>
+</li>
+<li><p>nslookup 获得域名对应ip</p>
+</li>
+<li><p>telnet 端口是否通</p>
+</li>
+<li><p>tcpdump 抓取数据包</p>
+</li>
+<li><p>netstat 监听地址 <code>netstat -ntpl</code> </p>
+</li>
+<li><p>ss</p>
+</li>
+</ul>
+<h2 id="软件安装"><a href="#软件安装" class="headerlink" title="软件安装"></a>软件安装</h2><ul>
+<li>软件包管理器<ul>
+<li>CentOS、RedHat使用yum包管理器、软件安装包格式为rpm</li>
+<li>Debian、Ubuntu使用apt包管理器、软件安装包格式为deb</li>
+</ul>
+</li>
+</ul>
+<h3 id="rpm"><a href="#rpm" class="headerlink" title="rpm"></a>rpm</h3><blockquote>
+<p>rpm需要自己管理软件依赖关系</p>
+</blockquote>
+<ol>
+<li><p>rpm包格式</p>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221103105353173.png" alt="image-20221103105353173"></p>
+</li>
+<li><p>rpm命令常用参数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-q 查询软件包</span><br><span class="line">-i 安装软件包</span><br><span class="line">-e 卸载软件包</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="yum"><a href="#yum" class="headerlink" title="yum"></a>yum</h3><blockquote>
+<p>yum 帮助我们解决软件rpm包的依赖关系</p>
+<p>CentOS yum 源 <a target="_blank" rel="noopener" href="http://mirror.centos.org/centos/7/">http://mirror.centos.org/centos/7/</a></p>
+<p>国内镜像 <a target="_blank" rel="noopener" href="https://opsx.alibaba.com/mirror">https://opsx.alibaba.com/mirror</a></p>
+</blockquote>
+<ol>
+<li><p>配置国内yum仓库镜像</p>
+<ul>
+<li><p>yum配置文件<code>/etc/yum.repos.d/CentOS-Base.repo</code> </p>
+</li>
+<li><p>下载配置文件覆盖</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>yum makecache</code></p>
+</li>
+</ul>
+</li>
+<li><p>yum命令常用选项</p>
+<ul>
+<li>install 安装软件包</li>
+<li>remove 卸载软件包</li>
+<li>list | grouplist 查看软件包</li>
+<li>update 升级软件包</li>
+</ul>
+</li>
+</ol>
+<h3 id="源码编译安装"><a href="#源码编译安装" class="headerlink" title="源码编译安装"></a>源码编译安装</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">• wget https://openresty.org/download/openresty-1.15.8.1.tar.gz</span><br><span class="line">• tar -zxf openresty-VERSION.tar.gz</span><br><span class="line">• cd openresty-VERSION/ </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可能需要安装 gcc</span></span><br><span class="line">yum install gcc gcc-c++ -y</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">pcre库</span></span><br><span class="line">yum install pcre-devel -y</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">openssl</span></span><br><span class="line">sudo yum install openssl-devel -y</span><br><span class="line"></span><br><span class="line">• ./configure --prefix=/usr/local/openresty    # 指定安装目录</span><br><span class="line">• make -j2 # 使用2个逻辑cpu编译</span><br><span class="line">• make install</span><br></pre></td></tr></table></figure>
+
+<h3 id="升级内核"><a href="#升级内核" class="headerlink" title="升级内核"></a>升级内核</h3><ul>
+<li><p>rpm格式内核</p>
+<ul>
+<li><p>查看内核版本 <code>uname -r</code> </p>
+</li>
+<li><p>升级内核版本 <code>yum install kernel-3.10.0</code></p>
+</li>
+<li><p>升级（包括内核）已安装的其他软件包和补丁 <code>yum update</code></p>
+</li>
+</ul>
+</li>
+<li><p>源代码编译安装内核</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">• 安装依赖包</span><br><span class="line">• yum install gcc gcc-c++ make ncurses-devel openssl-devel elfutils-libelf-devel</span><br><span class="line">• 下载并解压缩内核</span><br><span class="line">• https://www.kernel.org</span><br><span class="line">• tar xvf linux-5.1.10.tar.xz -C /usr/src/kernels</span><br><span class="line"></span><br><span class="line">• 配置内核编译参数</span><br><span class="line">• cd /usr/src/kernels/linux-5.1.10/</span><br><span class="line">• make menuconfig | allyesconfig | allnoconfig</span><br><span class="line">• 使⽤当前系统内核配置</span><br><span class="line">• cp /boot/config-kernelversion.platform /usr/src/kernels/</span><br><span class="line">linux-5.1.10/.config</span><br><span class="line"></span><br><span class="line">• 查看 CPU</span><br><span class="line">• lscpu</span><br><span class="line">• 编译</span><br><span class="line">• make -j2 all</span><br><span class="line">• 安装内核</span><br><span class="line">• make modules_install</span><br><span class="line">• make install</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="进程管理"><a href="#进程管理" class="headerlink" title="进程管理"></a>进程管理</h2><h3 id="进程查看命令"><a href="#进程查看命令" class="headerlink" title="进程查看命令"></a>进程查看命令</h3><ul>
+<li><p><code>ps</code> </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ps -e 查看所有进程</span><br><span class="line">ps -ef 查看所有进程更全面的信息 比如多了uid。ppid和cmd</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>top</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">load average: 平均负载，衡量系统的繁忙程度; 三个参数分别是 1分钟 5分钟 15分钟 的采样汇总</span><br><span class="line"><span class="meta prompt_">%</span><span class="language-bash">Cpu : cpu使用百分比; us是用户程序计算 sy是系统进程使用 <span class="built_in">id</span>空闲状态  wa cpu等待磁盘io百分比</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="进程设置优先级"><a href="#进程设置优先级" class="headerlink" title="进程设置优先级"></a>进程设置优先级</h3><ul>
+<li><p><code>nice</code> 范围从-20 到 19 ，对应 top 的 NI 值，值越⼩优先级越⾼，抢占资源就越多</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nice -n 10 xx.sh</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>renice </code>  重新设置优先级</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">renice -n 10 pid</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="进程作业控制"><a href="#进程作业控制" class="headerlink" title="进程作业控制"></a>进程作业控制</h3><ul>
+<li><p><code>&amp;</code> 符号， 将进程后台执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">./a.sh &amp;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">进程后台执行，并忽略挂起信号</span></span><br><span class="line">nohup ./a.sh &amp; </span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>jobs</code> 查看作业，</p>
+<ul>
+<li><code>fg</code> 加上 <code>jobs</code> 中的编号将进程调回到前台，</li>
+<li>ctl+z 将进程调回后台并挂起</li>
+<li><code>bg</code> 加上编号 ，将后台挂起的进程再次运行</li>
+</ul>
+</li>
+</ul>
+<h2 id="内存与磁盘管理"><a href="#内存与磁盘管理" class="headerlink" title="内存与磁盘管理"></a>内存与磁盘管理</h2><ul>
+<li><p>内存查看</p>
+<ul>
+<li><p><code>free</code> </p>
+</li>
+<li><p><code>top</code></p>
+</li>
+</ul>
+</li>
+<li><p>磁盘查看</p>
+<ul>
+<li><code>df -h</code> </li>
+<li><code>du -h</code> 查看文件大小</li>
+</ul>
+</li>
+</ul>
+<h1 id="shell"><a href="#shell" class="headerlink" title="shell"></a>shell</h1><h2 id="什么是shell"><a href="#什么是shell" class="headerlink" title="什么是shell"></a>什么是shell</h2><p>shell是命令解释器，用于解释用户对操作系统的操作，是用户和内核沟通的桥梁。</p>
+<p>centos 7 默认shell是bash</p>
+<h2 id="shell脚本格式"><a href="#shell脚本格式" class="headerlink" title="shell脚本格式"></a>shell脚本格式</h2><ol>
+<li><code>#!/bin/bash</code> 开头声明使用bash解释器</li>
+<li>’ # ‘ 注释</li>
+<li><code> chmod u+rx</code> 可执行权限</li>
+<li>执行命令  <code>./filename.sh</code></li>
+</ol>
+<h2 id="shell脚本不同执行方式，不同影响"><a href="#shell脚本不同执行方式，不同影响" class="headerlink" title="shell脚本不同执行方式，不同影响"></a>shell脚本不同执行方式，不同影响</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bash ./filename.sh # 不需要可执行权限；产生一个bash子进程去运行脚本</span><br><span class="line">./filename.sh # 脚本需要可执行权限；会产生一个子进程去执行脚本</span><br><span class="line"></span><br><span class="line">source filename.sh # 当前进程执行，cd命令会进入文件夹，脚本会对当前的进程产生影响</span><br><span class="line">. filename.sh # 同上</span><br></pre></td></tr></table></figure>
+
+<h2 id="重定向"><a href="#重定向" class="headerlink" title="重定向"></a>重定向</h2><p>一个进程默认会打开标准输入0，标准输出1、错误输出2三个文件描述符fd</p>
+<ol>
+<li><p>输入重定向符号 <code>&quot;&lt;&quot;</code>， 通过读文件代替键盘输入</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">read var &lt; word.txt</span><br><span class="line">echo $var</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>输出重定向符号 标准输出<code>&quot;&gt;&quot; ； 错误输出 &quot;2&gt;&quot;；   两者都输出&quot;&amp;&gt;&quot;</code> </p>
+<ul>
+<li>“&gt;” 会覆盖文件</li>
+<li>“&gt;&gt;” 追加输出文件</li>
+</ul>
+</li>
+</ol>
+<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><h3 id="变量定义"><a href="#变量定义" class="headerlink" title="变量定义"></a>变量定义</h3><p>变量的命名规则：</p>
+<ol>
+<li>字母、数字、下划线</li>
+<li>不以数字开头</li>
+</ol>
+<h3 id="变量的赋值"><a href="#变量的赋值" class="headerlink" title="变量的赋值"></a>变量的赋值</h3><ul>
+<li><p>变量名&#x3D;变量值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a=123</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将命令结果赋值给变量，使用<code>$()</code> 或者飘号 &#96;&#96;</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">letc=$(ll)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>变量值有空格等特殊字符，可以包括在双引号<code>&quot;&quot;</code>或者单引号 <code>&#39;&#39;</code>中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">word=&quot;hello world&quot;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="变量的引用"><a href="#变量的引用" class="headerlink" title="变量的引用"></a>变量的引用</h3><ul>
+<li><p><code>$&#123;变量名&#125; </code> 称作对变量的引用，部分情况下可以省略为 <code>$变量名</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">world=&quot;hello world&quot;</span><br><span class="line">echo $world123 </span><br><span class="line"># 楼上命令报错，没有变量world123</span><br><span class="line">echo $&#123;world&#125;123</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="变量的作用范围"><a href="#变量的作用范围" class="headerlink" title="变量的作用范围"></a>变量的作用范围</h3><ul>
+<li><p>变量的默认范围是当前shell</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">testw=&quot;hello&quot;</span><br><span class="line">bash</span><br><span class="line">echo $testw # 输出为空</span><br><span class="line">exit </span><br><span class="line">echo $testw # 输出hello</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>变量暴露给子shell</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export testval=&quot;hello world&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>变量删除</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">unset testval</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>子shell使用父shell变量</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">source subshell.sh</span><br><span class="line"># 或者</span><br><span class="line">. subshell.sh</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="环境变量、预定义变量、位置变量"><a href="#环境变量、预定义变量、位置变量" class="headerlink" title="环境变量、预定义变量、位置变量"></a>环境变量、预定义变量、位置变量</h3><ol>
+<li><strong>环境变量</strong></li>
+</ol>
+<ul>
+<li>set 和 env 命令 查看变量</li>
+<li><code>$PATH</code> 命令搜索路径</li>
+</ul>
+<ol start="2">
+<li><strong>预定义变量</strong></li>
+</ol>
+<ul>
+<li><code>$?</code> 返回结果0是指上一条命令执行成功，其他是执行失败</li>
+<li><code>$$</code> 返回进程id</li>
+<li><code>$0</code> 返回当前进程名称</li>
+</ul>
+<ol start="3">
+<li><strong>位置变量</strong></li>
+</ol>
+<ul>
+<li><p><code>$1 $2 ...$9 $&#123;10&#125;</code>  读取脚本参数1-到10位</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">value=$&#123;2-other&#125; # 如果第二个参数为空，则替换为 &quot;other&quot;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="环境变量配置文件"><a href="#环境变量配置文件" class="headerlink" title="环境变量配置文件"></a>环境变量配置文件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/etc/profile</span><br><span class="line">/etc/profile.d/</span><br><span class="line">~/.bash_profile</span><br><span class="line">~/.bashrc</span><br><span class="line">/etc/bashrc</span><br></pre></td></tr></table></figure>
+
+<p><strong>新增环境变量建议：</strong></p>
+<ol>
+<li><p>在 <code>/etc/profile.d/</code> 文件自己的脚本 <code>myenv.sh</code></p>
+</li>
+<li><p>编辑改文件新增环境变量</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># JAVA_HOME</span><br><span class="line">export JAVA_HOME=/opt/module/jdk1.8.0_212</span><br><span class="line">export PATH=$PATH:$JAVA_HOME/bin</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>是改环境变量生效</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source /etc/profile.d/myenv.sh</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h2><ul>
+<li><p>定义数组</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arr=（1 2 3）</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>输出所有的元素</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo $&#123;arr[@]&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>输出元素个数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo $&#123;#arr[@]&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>输出指定位置元素</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 输出第一个元素</span><br><span class="line">echo $&#123;arr[0]&#125; </span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="引用符号"><a href="#引用符号" class="headerlink" title="引用符号"></a>引用符号</h2><ul>
+<li><p>双引号（不完全引用）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var1=123</span><br><span class="line">echo &quot;$var1&quot;</span><br><span class="line"># 结果是 123</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>单引号(完全引用)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var1=123</span><br><span class="line">echo &#x27;$var1&#x27;</span><br><span class="line"># 结果是 $var1</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>飘号 &#96;&#96;执行命令</p>
+</li>
+</ul>
+<h2 id="整数运算"><a href="#整数运算" class="headerlink" title="整数运算"></a>整数运算</h2><ul>
+<li><p><code>expr</code> 运算</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">expr 1 + 2</span><br><span class="line"># 返回3 ， 注意每个字符之间都需要空格</span><br><span class="line"></span><br><span class="line"># `expr` 运算赋值通过飘号</span><br><span class="line">num1=`expr 1 + 2`</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>圆括号</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">((a=1+2))</span><br><span class="line">echo $a</span><br><span class="line"># 返回3</span><br><span class="line"># 或者</span><br><span class="line">echo $((1+2))</span><br><span class="line"></span><br><span class="line"># 自增</span><br><span class="line">((a++))</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="特殊符号小总结"><a href="#特殊符号小总结" class="headerlink" title="特殊符号小总结"></a>特殊符号小总结</h2><h3 id="圆括号"><a href="#圆括号" class="headerlink" title="圆括号()"></a>圆括号()</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># 数组</span><br><span class="line">arr=(1 2 3)</span><br><span class="line"></span><br><span class="line"># 命令赋值</span><br><span class="line">cmd1=$(ls)</span><br><span class="line"></span><br><span class="line"># 运算</span><br><span class="line">echo $((1+2))</span><br><span class="line"></span><br><span class="line"># 判断</span><br><span class="line">(( 5 &gt; 4 ))</span><br><span class="line">echo $?</span><br></pre></td></tr></table></figure>
+
+<h3 id="方括号"><a href="#方括号" class="headerlink" title="方括号[]"></a>方括号[]</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 判断</span><br><span class="line">[ 5 -gt 4 ]</span><br><span class="line">echo $?</span><br><span class="line"># 结果 0</span><br><span class="line"></span><br><span class="line">[[ 5 &gt; 4 ]]</span><br></pre></td></tr></table></figure>
+
+<h3 id="花括号"><a href="#花括号" class="headerlink" title="花括号{}"></a>花括号{}</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 表示数字范围</span><br><span class="line">echo &#123;0..9&#125;</span><br><span class="line"># 结果输出 0到9</span><br><span class="line"></span><br><span class="line"># 重复部分简写</span><br><span class="line">cp -v word.txt word.txt</span><br><span class="line">cp -v word.txt&#123;,.bak&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="test判断"><a href="#test判断" class="headerlink" title="test判断"></a>test判断</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">man test</span><br><span class="line"></span><br><span class="line"># 判断是否文件</span><br><span class="line">test -f /etc/passwd</span><br><span class="line"></span><br><span class="line"># 简写</span><br><span class="line">[ -f /etc/passwd ]</span><br><span class="line">echo $?</span><br><span class="line"># 成功输出0</span><br></pre></td></tr></table></figure>
+
+<h2 id="if-then语句"><a href="#if-then语句" class="headerlink" title="if-then语句"></a>if-then语句</h2><p>格式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if [ 测试条件成立 ] 或命令返回值是否为0</span><br><span class="line">then 执行相应命令</span><br><span class="line">fi 结束</span><br></pre></td></tr></table></figure>
+
+<p>或者美化格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if [ 条件 ] ; then</span><br><span class="line">   echo &quot;yes&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<h2 id="if-then-else-语句"><a href="#if-then-else-语句" class="headerlink" title="if-then-else 语句"></a>if-then-else 语句</h2><p>格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if [ 测试条件成立 ]</span><br><span class="line">then 执行相应命令</span><br><span class="line">else 测试条件不成立，执行相应命令</span><br><span class="line">fi 结束</span><br></pre></td></tr></table></figure>
+
+<p>或者</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if [ 条件 ] ; then</span><br><span class="line">   echo &quot;yes&quot;</span><br><span class="line">else</span><br><span class="line">   echo &quot;no&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<h2 id="if-elif-else-语句"><a href="#if-elif-else-语句" class="headerlink" title="if-elif-else 语句"></a>if-elif-else 语句</h2><p>格式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">if [ 条件1 ] ; then</span><br><span class="line">   echo &quot;yes&quot;</span><br><span class="line">elif [条件2 ] ; then</span><br><span class="line">   echo &quot;yes&quot;</span><br><span class="line">else</span><br><span class="line">   echo &quot;no&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<h2 id="if嵌套"><a href="#if嵌套" class="headerlink" title="if嵌套"></a>if嵌套</h2><p>格式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if [ 条件1 ] ; then</span><br><span class="line">	if [ 条件2 ] ; then</span><br><span class="line">	 	echo &quot;if嵌套&quot;</span><br><span class="line">	 fi</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<h2 id="case-语句"><a href="#case-语句" class="headerlink" title="case 语句"></a>case 语句</h2><p>格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">case &quot;$变量&quot; in</span><br><span class="line">	&quot;情况1&quot; )</span><br><span class="line">		命令... </span><br><span class="line">		;;</span><br><span class="line">	&quot;情况2&quot; )</span><br><span class="line">		命令... </span><br><span class="line">		;;</span><br><span class="line">	 * )</span><br><span class="line">	 echo &quot;others&quot; </span><br><span class="line">	 ;;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure>
+
+<h2 id="for-循环格式"><a href="#for-循环格式" class="headerlink" title="for 循环格式"></a>for 循环格式</h2><ul>
+<li>遍历列表格式</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">for 参数 in 列表</span><br><span class="line">  do 执行的命令</span><br><span class="line">done 结束</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">列表可以是多个变量（空格隔开）、或者命令执行结果等</span></span><br><span class="line">for i in 1 2 3</span><br><span class="line">for i in &#123;1..9&#125;</span><br><span class="line">for i in `ls`</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>循环遍历格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">for (( i=1 ; i&lt;=10 ; i++ ))</span><br><span class="line">do</span><br><span class="line">  echo $i</span><br><span class="line">done</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="while-循环"><a href="#while-循环" class="headerlink" title="while 循环"></a>while 循环</h2><p>格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">while test判断条件</span><br><span class="line">do</span><br><span class="line">  命令</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">while :</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">等于 <span class="keyword">while</span> <span class="literal">true</span></span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>until循环格式（条件为真，结束循环）</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">until test判断条件</span><br><span class="line">do</span><br><span class="line">  命令</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+<h2 id="位置参数"><a href="#位置参数" class="headerlink" title="位置参数"></a>位置参数</h2><ul>
+<li><p><code>$0</code> 表示脚本名称</p>
+</li>
+<li><p><code>$1</code> 表示第一个参数</p>
+</li>
+<li><p><code>$*</code> 和 <code>$@</code> 表示所有的位置参数</p>
+</li>
+<li><p><code>$#</code> 表示位置参数的数量</p>
+</li>
+<li><p><code>shift</code> 参数左移，逐一处理参数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">while [ $# -ge 1 ] ; do</span><br><span class="line">  echo $1</span><br><span class="line">  shift</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">./a.sh a b c </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">输出结果是 a b c</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="自定义函数"><a href="#自定义函数" class="headerlink" title="自定义函数"></a>自定义函数</h2><p>格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">function fname()&#123;</span><br><span class="line">  命令</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">简写</span></span><br><span class="line">fname() &#123;</span><br><span class="line">  命令</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">函数执行</span></span><br><span class="line">fname</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">取消函数</span></span><br><span class="line">unset</span><br></pre></td></tr></table></figure>
+
+<h2 id="定时任务"><a href="#定时任务" class="headerlink" title="定时任务"></a>定时任务</h2><ol>
+<li><p>一次性任务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">at 8:00</span><br><span class="line">echo hello &gt;&gt; /tmp/hello.txt</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ctl+d 提交任务</span></span><br><span class="line"></span><br><span class="line">atq 查看定时任务</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>周期任务 cron</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 配置方式</span><br><span class="line">crontab -e</span><br><span class="line"></span><br><span class="line"># 查看现有的计划任务</span><br><span class="line">crontab -l</span><br><span class="line"></span><br><span class="line"># 配置格式</span><br><span class="line">分钟 小时 日期 月份 星期 执行的命令</span><br><span class="line"></span><br><span class="line"># 查看日志</span><br><span class="line">sudo tail -f /var/log/cron</span><br><span class="line"></span><br><span class="line"># 删除crontab</span><br><span class="line">crontab -e 将其命令删除即可</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h1 id="文本操作"><a href="#文本操作" class="headerlink" title="文本操作"></a>文本操作</h1><h2 id="元字符"><a href="#元字符" class="headerlink" title="元字符"></a>元字符</h2><ul>
+<li><p><code>.</code> 匹配除换行符外的任意单个字符</p>
+</li>
+<li><p><code>*</code> 匹配任意一个跟在它之前的字符</p>
+</li>
+<li><p><code>[]</code> 匹配括号中的字符类中的任意一个</p>
+</li>
+<li><p><code>^</code> 匹配开头</p>
+</li>
+<li><p><code>$</code> 匹配结尾</p>
+</li>
+<li><p><code>\</code> 转移后面的特殊字符</p>
+</li>
+</ul>
+<p><strong>拓展元字符</strong></p>
+<ul>
+<li><code>+</code> 匹配前面的正则表达式至少出现1次</li>
+<li><code>?</code> 匹配前面的正则表达式出现0次或1次</li>
+<li><code>|</code> 匹配前面或后面的正则表达式</li>
+</ul>
+<h2 id="文本内容查找grep"><a href="#文本内容查找grep" class="headerlink" title="文本内容查找grep"></a>文本内容查找grep</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">格式</span></span><br><span class="line">grep 选项 文本文件[可多个文本]</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">常用选项</span></span><br><span class="line">-i 忽略大小写</span><br><span class="line">-r 递归读所有子目录</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">grep 过滤符合条件的一行</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">标准匹配(包含hello的一行)</span></span><br><span class="line">grep hello ./helloworld.txt</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="文件查找命令find"><a href="#文件查找命令find" class="headerlink" title="文件查找命令find"></a>文件查找命令find</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">格式</span></span><br><span class="line">find 路径 查找条件[补充条件]</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">1对1的匹配</span></span><br><span class="line">find passwd</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找出/etc 下所有叫passwd的文件</span></span><br><span class="line">find /etc -name passwd</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">通配符</span></span><br><span class="line">find /etc -name pass*</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">正则表达式</span></span><br><span class="line">find /etc -regex .*wd</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">批量删除</span></span><br><span class="line">find *.txt -exec rm -v &#123;&#125; \;</span><br></pre></td></tr></table></figure>
+
+<h2 id="sed"><a href="#sed" class="headerlink" title="sed"></a>sed</h2><h3 id="替换命令s"><a href="#替换命令s" class="headerlink" title="替换命令s"></a>替换命令s</h3><p><strong>sed 行编辑器，一般用于对文本内容进行替换</strong></p>
+<p><strong>sed的基本工作方式：</strong></p>
+<ol>
+<li>将文件以行为单位读取到内存（模式空间）</li>
+<li>使用sed的每个脚本对该进行操作</li>
+<li>处理完成后输出该行</li>
+</ol>
+<p><strong>sed的替换命令s:</strong></p>
+<ul>
+<li>如果一行有多个old的元素，默认只替换第一个，<code>&#39;s/old/new/g&#39;</code>  全部都替换</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sed ’s/old/new/’ filename</span><br><span class="line">sed -e ’s/old/new/’ -e ’s/old/new/’ filename  …</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>如果old是特殊字符，可以使用！或者其他字符做分隔符</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;s!/!hello!&#x27; hello.txt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>-i</code> 将替换的结果覆盖到源文件，上面两个操作对源文件没有影响</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i ’s/old/new/’ ’s/old/new/’ filename  …</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>带正则表达式的替换命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sed ’s/正则表达式/new/’ filename</span><br><span class="line"></span><br><span class="line">sed -r ’s/扩展正则表达式/new/’ filename</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>分组和回调</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将 abc 替换为 abc:abc  ;  \1 表示第1组</span></span><br><span class="line">sed -r &#x27;s/(abc)/\1:\1/&#x27; a.txt</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="替换命令加强版"><a href="#替换命令加强版" class="headerlink" title="替换命令加强版"></a>替换命令加强版</h3><ul>
+<li><p><strong>标志位</strong> <code>s/old/new/标志位</code> </p>
+<ol>
+<li>数字，第几次出现才进行替换</li>
+<li><code>s/old/new/g</code>  ，每次出现都替换</li>
+<li><code>s/old/new/p</code> ， p打印空间模式的内容</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将修改的行输出</span></span><br><span class="line">sed -n &#x27;s/aaa/bbb/p&#x27; a.txt</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li><code>s/old/new/w filename</code> ， 将模式空间的内容写入到文件</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将修改的这一行写入到 b.txt</span></span><br><span class="line">sed -n &#x27;s/aaa/bbb/w b.txt&#x27; a.txt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>寻址</strong> 默认对每行进行操作，增加寻址后对匹配的行进行操作</p>
+<ol>
+<li><p><code>/正则表达式/s/old/new/g</code> </p>
+</li>
+<li><p><code>行号s/old/new/g</code>  </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">指定第10行</span></span><br><span class="line">sed &#x27;10s/old/new/g&#x27;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第1行到第5行</span></span><br><span class="line">sed &#x27;1,5s/old/new/g&#x27;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第5行到最后一行</span></span><br><span class="line">sed &#x27;5,$s/old/new/g&#x27;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>两种寻址符号行号和正则可以一起用</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;/root/,$s/bash/!/g&#x27;</span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+<li><p><strong>分组</strong></p>
+<p>寻址可以匹配多条命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/regular/&#123;s/old/new/ ; s/old/new/&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>脚本文件</strong></p>
+<p>可以将选项保存为文件，使用-f 加载脚本文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -f sedscript filename</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="sed的其他常用命令"><a href="#sed的其他常用命令" class="headerlink" title="sed的其他常用命令"></a>sed的其他常用命令</h3><ul>
+<li><p><strong>删除命令</strong> <code>[寻址]d</code> </p>
+<p>删除模式空间内容，改变脚本的控制流，重新读取输入行</p>
+<p>即将匹配的所在行删除</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将aa所在行的模式空间删除</span></span><br><span class="line">sed &#x27;/aa/d&#x27; a.txt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>追加插入和更改</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">追加a 在匹配的下一行插入 hello</span></span><br><span class="line">sed &#x27;/aa/a hello&#x27; a.txt</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">插入i 在匹配的上一行插入</span></span><br><span class="line">sed &#x27;/aa/i hello&#x27; a.txt</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更改c 将匹配的所在行更换为hello</span></span><br><span class="line">sed &#x27;/aa/c hello&#x27; a.txt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>读文件</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将文件data.txt 读入到a.txt 的 匹配行下，合成一个文件</span></span><br><span class="line">sed &#x27;/a/r data.txt&#x27; a.txt </span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="AWK"><a href="#AWK" class="headerlink" title="AWK"></a>AWK</h2><h3 id="认识AWK"><a href="#认识AWK" class="headerlink" title="认识AWK"></a>认识AWK</h3><p>AWK 一般用于对文本内容进行统计、按需要的格式进行输出</p>
+<ul>
+<li><strong>awk和sed区别</strong></li>
+</ul>
+<blockquote>
+<p>AWK更像是脚本语言， 用于比较规范的文本处理，用于统计数量并输出指定字段</p>
+<p>sed将不规范的文本，通过替换等处理为比较规范的文本</p>
+</blockquote>
+<ul>
+<li><p><strong>记录和字段</strong></p>
+<ol>
+<li>每行称为awk的记录</li>
+<li>使用空格、制表符分隔开的单词称作字段</li>
+<li>可以自己指定分隔的字段</li>
+</ol>
+</li>
+<li><p><strong>字段的引用</strong></p>
+<ol>
+<li><p>awk中使用 <code>$1 $2 .. $n</code> 表示每一个字段， <code>$0</code> 表示整行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">awk &#x27;&#123;print $1,$2,$3&#125;&#x27; filename</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>awk 可以使用 <code>-F</code> 选项来指定分隔符</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">awk -F &#x27;,&#x27; &#x27;&#123;print $1,$2,$3&#125;&#x27; filename</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>可以使用正则表达式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">awk -F &#x27;,&#x27; &#x27;/wd$/&#123;print $1,$2,$3&#125;&#x27; filename</span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+<li><p><strong>AWK 脚本的流程控制</strong></p>
+<ol>
+<li>输入数据前例程 <code>BEGIN&#123;&#125;</code></li>
+<li>主输入循环 {}</li>
+<li>所有文件读取完成例程 <code>END&#123;&#125;</code></li>
+</ol>
+</li>
+</ul>
+<h3 id="系统变量"><a href="#系统变量" class="headerlink" title="系统变量"></a>系统变量</h3><ol>
+<li><p><strong><code>FS</code>  和 <code>OFS</code> 字段分隔符，<code>OFS</code>  表示输出的字段分隔符</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">head -5 /etc/passwd | awk &#x27;BEGIN&#123;FS=&quot;:&quot;&#125;&#123;print $1&#125;&#x27;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">等同</span></span><br><span class="line">head -5 /etc/passwd | awk -F &#x27;:&#x27; &#x27;&#123;print $1&#125;&#x27;</span><br><span class="line"></span><br><span class="line">head -5 /etc/passwd | awk &#x27;BEGIN&#123;FS=&quot;:&quot;;OFS=&quot;-&quot;&#125;&#123;print $1,$2&#125;&#x27;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">等同</span></span><br><span class="line">head -5 /etc/passwd | awk -F &#x27;:&#x27; &#x27;&#123;print $1 &quot;-&quot; $2&#125;&#x27;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>RS</code> 记录分隔符（换行符）</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将 冒号 ： 作为换行符</span></span><br><span class="line">head -5 /etc/passwd | awk &#x27;BEGIN&#123;RS=&quot;:&quot;&#125;&#123;print $0&#125;&#x27;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>NR</code>  和 <code>FNR</code> 行数</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">一个文件 两个一样，如果多个文件 FNR 分别显示各个文件的行号，NR 显示合并后的行号</span></span><br><span class="line">head -5 /etc/passwd | awk &#x27;&#123;print NR,$0&#125;&#x27;</span><br><span class="line"></span><br><span class="line">awk &#x27;&#123;print FNR,$0&#125;&#x27; /etc/hosts /etc/hosts</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>NF</code> 字段数量，最后一个字段内容可以用 <code>$NF</code> 取出</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">head -5 /etc/passwd | awk -F &#x27;:&#x27; &#x27;&#123;print NF&#125;&#x27;</span><br><span class="line"></span><br><span class="line">head -5 /etc/passwd | awk -F &#x27;:&#x27; &#x27;&#123;print $NF&#125;&#x27;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="awk的判断和循环"><a href="#awk的判断和循环" class="headerlink" title="awk的判断和循环"></a>awk的判断和循环</h3><ul>
+<li><p><strong>条件语句 if</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">if(表达式)</span><br><span class="line">   awk语句1</span><br><span class="line">[else</span><br><span class="line">   awk语句2</span><br><span class="line">]</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果有多个语句需要执行可以使用 &#123; &#125; 将多个语句括起来</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果第二个字段 &gt; 80 ，输出整行</span></span><br><span class="line">awk &#x27;&#123;if($2&gt;80) print $0&#125;&#x27; kpi.txt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>循环</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="keyword">while</span> 循环</span></span><br><span class="line">while(表达式)</span><br><span class="line">  awk语句1</span><br><span class="line">    </span><br><span class="line">do&#123;</span><br><span class="line">  awk语句1</span><br><span class="line">&#125;while(表达式)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="keyword">for</span> 循环</span></span><br><span class="line">for(初始值;循环判断条件;累加)</span><br><span class="line">  awk语句1</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2022/10/30/hexo%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E5%8F%8A%E5%8D%9A%E5%AE%A2%E5%A4%87%E4%BB%BD/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -389,20 +1032,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">12</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

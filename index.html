@@ -161,6 +161,597 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/04/Redis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="arui zhong">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="阿睿的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/12/04/Redis/" class="post-title-link" itemprop="url">Redis</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-12-04 22:01:02 / 修改时间：22:03:28" itemprop="dateCreated datePublished" datetime="2022-12-04T22:01:02+08:00">2022-12-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="特点："><a href="#特点：" class="headerlink" title="特点："></a>特点：</h2><ul>
+<li>数据结构是 <code>key-value</code> 键值对，存储在内存中</li>
+<li>支持持久化</li>
+<li>五大数据结构</li>
+<li>支持集群， 主从同步</li>
+<li>支持发布&#x2F;订阅模式</li>
+</ul>
+<h2 id="应用场景："><a href="#应用场景：" class="headerlink" title="应用场景："></a>应用场景：</h2><ul>
+<li>分担关系型数据库的读写IO压力</li>
+<li>作为数据共享中间件，如Session</li>
+<li>不同数据结构的特性应用：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>应用场景</th>
+<th>数据结构</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>最新N个数据</td>
+<td>通过List按照时间排序</td>
+</tr>
+<tr>
+<td>统计TopN</td>
+<td>zset有序集合</td>
+</tr>
+<tr>
+<td>时效性数据，比如验证码</td>
+<td>Expire 过期命令</td>
+</tr>
+<tr>
+<td>计数器，秒杀</td>
+<td>原子性方法，incr和decr</td>
+</tr>
+<tr>
+<td>保证数据的唯一性</td>
+<td>set结构存储</td>
+</tr>
+<tr>
+<td>构建队列</td>
+<td>list</td>
+</tr>
+<tr>
+<td>发布订阅系统</td>
+<td>pub&#x2F;sub 模式</td>
+</tr>
+</tbody></table>
+<h1 id="命令："><a href="#命令：" class="headerlink" title="命令："></a>命令：</h1><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>redis-server [redis.conf]</td>
+<td>启动redis服务器</td>
+</tr>
+<tr>
+<td>redis-cli shutdown</td>
+<td>关闭redis服务器</td>
+</tr>
+<tr>
+<td>redis-cli [-h hostIP -p 6379 -a 密码]</td>
+<td>启动客户端</td>
+</tr>
+<tr>
+<td>exit</td>
+<td>退出客户端</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>select 1</td>
+<td>切换到数据库1</td>
+</tr>
+<tr>
+<td>dbsize</td>
+<td>查看当前数据库的key的数量</td>
+</tr>
+<tr>
+<td>flushdb</td>
+<td>清空当前库</td>
+</tr>
+<tr>
+<td>flushall</td>
+<td>清空所有的库</td>
+</tr>
+</tbody></table>
+<h1 id="五大数据结构"><a href="#五大数据结构" class="headerlink" title="五大数据结构"></a>五大数据结构</h1><p>redis的键值对，<code>key</code> 是String类型，五大数据类型是指 <code>value</code> </p>
+<h2 id="redis键-key"><a href="#redis键-key" class="headerlink" title="redis键 key"></a>redis键 key</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>keys *</td>
+<td>展示所有的键</td>
+</tr>
+<tr>
+<td>exists k1</td>
+<td>查询键： k1是否存在；返回1存在，0不存在</td>
+</tr>
+<tr>
+<td>type k1</td>
+<td>根据key查询value的数据结构类型</td>
+</tr>
+<tr>
+<td>del key</td>
+<td>删除指定的key及其数据（直接删除</td>
+</tr>
+<tr>
+<td>unlink key</td>
+<td>仅将key从keyspace元数据中删除，真正的删除在后续的异步操作</td>
+</tr>
+<tr>
+<td>expire key 10</td>
+<td>设定key的过期时间为10秒</td>
+</tr>
+<tr>
+<td>ttl key</td>
+<td>查询key的剩余时间（最终值-2，表示已过期）</td>
+</tr>
+</tbody></table>
+<h2 id="String-字符串"><a href="#String-字符串" class="headerlink" title="String 字符串"></a>String 字符串</h2><h3 id="概述："><a href="#概述：" class="headerlink" title="概述："></a>概述：</h3><ul>
+<li>redis中String是最基本的数据类型，</li>
+<li>是二进制安全的，可以将存储任意类型的数据以字符串的形式存储</li>
+<li>对应的Value最大可存 512M</li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221202211416896.png" alt="image-20221202211416896"></p>
+<h3 id="操作命令："><a href="#操作命令：" class="headerlink" title="操作命令："></a>操作命令：</h3><p>incr和decr都是原子操作，因为redis的操作是单线程的，避免了多线程的打断情况</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set k1 v1 [ex seconds | px milseconds] [nx | xx]</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>设置命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>set k1 v1</td>
+<td>添加键为k1，值为v2的数据（有相同的键，新value会覆盖旧值）</td>
+</tr>
+<tr>
+<td>setnx k1 v1</td>
+<td>添加数据，当已有k1时候，不会添加成功</td>
+</tr>
+<tr>
+<td>setex k1 过期时间 v1</td>
+<td>添加键值对，同时设置过期时间，单位为秒</td>
+</tr>
+<tr>
+<td>mset k1 v1 k2 v2</td>
+<td>添加多个键值对</td>
+</tr>
+<tr>
+<td>msetnx k1 v1 k2 v2</td>
+<td>添加多个键值对（键必须都是新值，否则全部失败，原子性操作）</td>
+</tr>
+<tr>
+<td>setrange k1 index word</td>
+<td>将word在 [index, end]的范围 开始覆盖原value</td>
+</tr>
+<tr>
+<td>set k1 v2 xx</td>
+<td>将k1覆盖，必须当k1存在时才操作</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>查询命令</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>get k1</td>
+<td>获取数据</td>
+</tr>
+<tr>
+<td>mget k1 k2</td>
+<td>获取多个value</td>
+</tr>
+<tr>
+<td>getset k1 v1</td>
+<td>设置新值，同时返回旧的value</td>
+</tr>
+<tr>
+<td>getrange k1 start end</td>
+<td>截取value，[startIndex, endIndex] 前包后包，（索引0开始）</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>append k1 abc</td>
+<td>追加数据 abc（并返回新值的总长度）</td>
+</tr>
+<tr>
+<td>strlen k1</td>
+<td>获得value的长度</td>
+</tr>
+<tr>
+<td>incr k1</td>
+<td>将 key 中储存的数字值增1（原子性操作</td>
+</tr>
+<tr>
+<td>decr k1</td>
+<td>将 key 中储存的数字值-1（原子性操作</td>
+</tr>
+<tr>
+<td>incrby &#x2F; decrby k1 步长</td>
+<td>对数值 加或减 指定步长（原子性操作</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="数据结构："><a href="#数据结构：" class="headerlink" title="数据结构："></a>数据结构：</h3><ul>
+<li><code>String</code> 的数据结构为简单动态字符串(<code>Simple Dynamic String,缩写 SDS</code>)。是可以修改的字符串内部结构，实现上类似于 Java 的 <code>ArrayList</code>，采用预分配冗余空间的方式 来减少内存的频繁分配.</li>
+<li>内部为当前字符串实际分配的空间 <code>capacity</code> 一般要高于实际字符串长度 len。当字符串长度小于 1M 时，扩容都是加倍现有的空间，如果超过 1M，扩容时一次只会多扩 1M 的空间。需要注意的是字符串最大长度为 512M。</li>
+</ul>
+<h2 id="list列表"><a href="#list列表" class="headerlink" title="list列表"></a>list列表</h2><h3 id="概述：-1"><a href="#概述：-1" class="headerlink" title="概述："></a>概述：</h3><ul>
+<li>value为list列表，是单键多值</li>
+<li>元素是可重复的、且有序的（插入顺序，最后插入的在左边，索引为0</li>
+<li>list底层是双向链表，可以以首尾为基准操作元素</li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221202211354594.png" alt="image-20221202211354594"></p>
+<h3 id="操作命令：-1"><a href="#操作命令：-1" class="headerlink" title="操作命令："></a>操作命令：</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">lpush k1 v1 v2 v1 v3  </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">插入顺序从左到右是： v3 v1 v2 v1 ;v3的索引为0</span></span><br><span class="line"></span><br><span class="line">lindex k1 0 </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">返回值是 v3</span></span><br><span class="line"></span><br><span class="line">lrem k1 1 v1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">从左边删除1个v1： 剩下v3 v2 v1</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>lpush &#x2F; rpush k1 v1 v2 v3</td>
+<td>从左边&#x2F;右边插入多个</td>
+</tr>
+<tr>
+<td>lpop &#x2F; rpop k1 [count]</td>
+<td>从左边&#x2F;右边 删除元素；count不填，默认删除1一个元素<br />删完了元素，键也自动删除</td>
+</tr>
+<tr>
+<td>rpoplpush k1 k2</td>
+<td>从k1的右边删除一个元素，并将该元素插入到 k2 的左边</td>
+</tr>
+<tr>
+<td>linsert k1 &lt;before|after&gt; oldV newV</td>
+<td>在oldV左边|右边插入newV</td>
+</tr>
+<tr>
+<td>lset k1 index v1</td>
+<td>将index处的元素替换为 v1</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>lrem k1 n v1</td>
+<td>从左边删除n个v1</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>lrange k1 start end</strong></td>
+<td><code>lrange k1 0 -1</code> 获取k1所有的元素</td>
+</tr>
+<tr>
+<td>lindex k1 index</td>
+<td>根据索引查询元素</td>
+</tr>
+<tr>
+<td>llen k1</td>
+<td>获得k1的列表长度</td>
+</tr>
+</tbody></table>
+<h3 id="数据结构：-1"><a href="#数据结构：-1" class="headerlink" title="数据结构："></a>数据结构：</h3><ul>
+<li>List 的数据结构为快速链表 quickList</li>
+<li>数据较少时候，会使用一块连续的内存存储，是通过 <code>zipList</code> 压缩链表存储</li>
+<li>数据较多时候，Redis 将链表和 ziplist 结合起来组成了 quicklist。也就是将多个 ziplist 使用双向指针串起来使用。这样既满足了快速的插入删除性能，又不会出现太大的空间冗余。</li>
+</ul>
+<h2 id="Set集合"><a href="#Set集合" class="headerlink" title="Set集合"></a>Set集合</h2><h3 id="概述：-2"><a href="#概述：-2" class="headerlink" title="概述："></a>概述：</h3><ul>
+<li>Set集合元素是唯一的</li>
+<li>value是String类型的无序集合</li>
+<li>底层维护的是一个值为null的hash表，crud的复杂度都是O(1)</li>
+</ul>
+<h3 id="操作命令：-2"><a href="#操作命令：-2" class="headerlink" title="操作命令："></a>操作命令：</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>sadd k1 v1 v2</td>
+<td>添加多个元素</td>
+</tr>
+<tr>
+<td>smove k1 k2 v1</td>
+<td>将k1中v1  移动到k2</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>smembers k1</strong></td>
+<td>返回集合中的所有元素</td>
+</tr>
+<tr>
+<td>srandmember k1 [n]</td>
+<td>随机从集合取出n个值（默认是1个），不会删除元素</td>
+</tr>
+<tr>
+<td>sismember k1 v1</td>
+<td>判断v1是否k1中（返回1是，0否）</td>
+</tr>
+<tr>
+<td>scard k1</td>
+<td>返回k1中的集合总个数</td>
+</tr>
+<tr>
+<td>srem k1 v1 v2 v3</td>
+<td>删除多个元素</td>
+</tr>
+<tr>
+<td>spop k1</td>
+<td>随机吐出一个值（并删除</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>sinter k1 k2</td>
+<td>返回两个集合的交集元素（k1 k2都有的部分</td>
+</tr>
+<tr>
+<td>sunion k1 k2</td>
+<td>返回两个集合的并集元素（有去重效果</td>
+</tr>
+<tr>
+<td>sdiff k1 k2</td>
+<td>返回两个集合的差集（k1有的，但k2没有）</td>
+</tr>
+</tbody></table>
+<h2 id="Hash哈希"><a href="#Hash哈希" class="headerlink" title="Hash哈希"></a>Hash哈希</h2><h3 id="概述：-3"><a href="#概述：-3" class="headerlink" title="概述："></a>概述：</h3><ul>
+<li><p>键值对的value部分是是 kv键值对结构，类似Java中的Map结构</p>
+</li>
+<li><p>适合用于存储对象，比如 key为user，value用于存储用户的属性和属性值</p>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221202211314138.png" alt="image-20221202211314138"></p>
+</li>
+</ul>
+<h3 id="操作命令：-3"><a href="#操作命令：-3" class="headerlink" title="操作命令："></a>操作命令：</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>hset k1 f1 v1 f2 v2 f3 v3</td>
+<td>给一个value添加多个属性值</td>
+</tr>
+<tr>
+<td>hsetnx k1 f1 v1</td>
+<td>当k1的属性f1不存在时，才可以添加成功</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>hget k1 f1</td>
+<td>根据键取指定的属性值</td>
+</tr>
+<tr>
+<td>hexists k1 f1</td>
+<td>查某k1的属性值f1是否存在</td>
+</tr>
+<tr>
+<td>hkeys k1</td>
+<td>列出k1所有的属性</td>
+</tr>
+<tr>
+<td>hvals k1</td>
+<td>列出k1所有的属性的值</td>
+</tr>
+<tr>
+<td>hincrby k1 f1 n</td>
+<td>n可以正数或负数</td>
+</tr>
+</tbody></table>
+<h3 id="数据结构：-2"><a href="#数据结构：-2" class="headerlink" title="数据结构："></a>数据结构：</h3><ul>
+<li>数据少时候用的是压缩表<code>zipList</code> </li>
+<li>多时候转为 <code>hashtable</code></li>
+</ul>
+<h2 id="ZSet有序集合"><a href="#ZSet有序集合" class="headerlink" title="ZSet有序集合"></a>ZSet有序集合</h2><h3 id="概述：-4"><a href="#概述：-4" class="headerlink" title="概述："></a>概述：</h3><ul>
+<li><p>key-value ，value是由多个 <code>成员 和评分</code> 组成的；类似hash结构</p>
+</li>
+<li><p>成员唯一，当添加重复的成员，新成员及新评分覆盖旧的数据</p>
+</li>
+<li><p>每个成员都关联一个评分（评分可重复），zset根据评分自动对成员排序（默认返回顺序是升序）</p>
+</li>
+<li><p>可以根据下标访问，但是下标顺序是大小顺序，不是插入顺序</p>
+</li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221204144340091.png" alt="image-20221204144340091"></p>
+<h3 id="操作命令：-4"><a href="#操作命令：-4" class="headerlink" title="操作命令："></a>操作命令：</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>zadd k1 score1 v1 score2 v2</td>
+<td>添加多个成员</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>zrange k1 0 -1 [withscores]</strong></td>
+<td>查询所有成员[及评分]，从小大到排序</td>
+</tr>
+<tr>
+<td>zrangebyscore k1 min max [withscores]</td>
+<td>查询 [minx, max] 评分返回的成员</td>
+</tr>
+<tr>
+<td>zrevrangebyscore k1 min max [withscores]</td>
+<td>返回倒序，查询 [minx, max] 评分返回的成员</td>
+</tr>
+<tr>
+<td>zcount k1 min max</td>
+<td>统计评分在 [min, max] 之间的成员个数</td>
+</tr>
+<tr>
+<td>zrank k1 v1</td>
+<td>查询成员v1的排名，从小到大（0开始</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>zincrby k1 100 jack</td>
+<td>评分操作，jack成员评分 +100（也可以是负数</td>
+</tr>
+<tr>
+<td>zrem k1 v1 v2 v3</td>
+<td>删除多个成员</td>
+</tr>
+</tbody></table>
+<h3 id="数据结构：-3"><a href="#数据结构：-3" class="headerlink" title="数据结构："></a>数据结构：</h3><ul>
+<li>hash将结构，hash将评分和成员关联起来， 保证了成员的唯一性，并可以通过成员映射其评分</li>
+<li>跳跃表， 目的是给元素的value排序，根据score范围查找元素列表<ul>
+<li>跳跃表通过多层的链表，来缩小查询的范围，从而缩小了单链表的查询次数（二分思想</li>
+</ul>
+</li>
+</ul>
+<h1 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h1><h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><h3 id="设置最大内存"><a href="#设置最大内存" class="headerlink" title="设置最大内存"></a>设置最大内存</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">WARNING: If you have replicas attached to an instance with maxmemory on,</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">the size of the output buffers needed to feed the replicas are subtracted</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">from the used memory count, so that network problems / resyncs will</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">not trigger a loop <span class="built_in">where</span> keys are evicted, and <span class="keyword">in</span> turn the output</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">buffer of replicas is full with DELs of keys evicted triggering the deletion</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">of more keys, and so forth until the database is completely emptied.</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># In short... if you have replicas attached it is suggested that you set a lower</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">limit</span> <span class="keyword">for</span> maxmemory so that there is some free RAM on the system <span class="keyword">for</span> replica</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">output buffers (but this is not needed <span class="keyword">if</span> the policy is <span class="string">&#x27;noeviction&#x27;</span>).</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># maxmemory &lt;bytes&gt;</span></span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="设置淘汰策略"><a href="#设置淘汰策略" class="headerlink" title="设置淘汰策略"></a>设置淘汰策略</h3><ul>
+<li>volatile-lru：使用 LRU 算法移除 key，只对设置了过期时间的键；（最近最少使用）</li>
+<li>allkeys-lru：在所有集合 key 中，使用 LRU 算法移除 key </li>
+<li>volatile-random：在过期集合中移除随机的 key，只对设置了过期时间的键 </li>
+<li>allkeys-random：在所有集合 key 中，移除随机的 key </li>
+<li>volatile-ttl：移除那些 TTL 值最小的 key，即那些最近要过期的 key </li>
+<li>noeviction：不进行移除。针对写操作，只是返回错误信息（默认策略）</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">MAXMEMORY POLICY: how Redis will select what to remove when maxmemory</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">is reached. You can select one from the following behaviors:</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># volatile-lru -&gt; Evict using approximated LRU, only keys with an expire set.</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">allkeys-lru -&gt; Evict any key using approximated LRU.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">volatile-lfu -&gt; Evict using approximated LFU, only keys with an expire <span class="built_in">set</span>.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">allkeys-lfu -&gt; Evict any key using approximated LFU.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">volatile-random -&gt; Remove a random key having an expire <span class="built_in">set</span>.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">allkeys-random -&gt; Remove a random key, any key.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">volatile-ttl -&gt; Remove the key with the nearest expire time (minor TTL)</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">noeviction -&gt; Don<span class="string">&#x27;t evict anything, just return an error on write operations.</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="string"></span></span></span><br><span class="line"><span class="string"><span class="language-bash"># LRU means Least Recently Used</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">LFU means Least Frequently Used</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="string"></span></span></span><br><span class="line"><span class="string"><span class="language-bash"># Both LRU, LFU and volatile-ttl are implemented using approximated</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">randomized algorithms.</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="string"></span></span></span><br><span class="line"><span class="string"><span class="language-bash"># Note: with any of the above policies, when there are no suitable keys for</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">eviction, Redis will return an error on write operations that require</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">more memory. These are usually commands that create new keys, add data or</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">modify existing keys. A few examples are: SET, INCR, HSET, LPUSH, SUNIONSTORE,</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">SORT (due to the STORE argument), and EXEC (if the transaction includes any</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">command that requires memory).</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="string"></span></span></span><br><span class="line"><span class="string"><span class="language-bash"># The default is:</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="string"></span></span></span><br><span class="line"><span class="string"><span class="language-bash"># maxmemory-policy noeviction</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="maxmemory-samples"><a href="#maxmemory-samples" class="headerlink" title="maxmemory-samples"></a>maxmemory-samples</h3><ul>
+<li>设置样本数量，LRU 算法和最小 TTL 算法都并非是精确的算法，而是估算值，所以你可以设置样本的大小，redis 默认会检查这么多个 key 并选择其中 LRU 的那个</li>
+<li>一般设置 3 到 7 的数字，数值越小样本越不准确，但性能消耗越小。</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">LRU, LFU and minimal TTL algorithms are not precise algorithms but approximated</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">algorithms (<span class="keyword">in</span> order to save memory), so you can tune it <span class="keyword">for</span> speed or</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">accuracy. By default Redis will check five keys and pick the one that was</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">used least recently, you can change the sample size using the following</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">configuration directive.</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># The default of 5 produces good enough results. 10 Approximates very closely</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="literal">true</span> LRU but costs more CPU. 3 is faster but not very accurate.</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># maxmemory-samples 5</span></span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Redis的发布订阅"><a href="#Redis的发布订阅" class="headerlink" title="Redis的发布订阅"></a>Redis的发布订阅</h1><h2 id="概念："><a href="#概念：" class="headerlink" title="概念："></a>概念：</h2><ul>
+<li>Redis 发布订阅 (pub&#x2F;sub) 是一种消息通信模式：发送者 (pub) 发送消息，订阅者 (sub) 接收消息。</li>
+<li>Redis 客户端可以订阅任意数量的频道。</li>
+</ul>
+<h2 id="操作："><a href="#操作：" class="headerlink" title="操作："></a>操作：</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">订阅频道</span></span><br><span class="line">SUBSCRIBE channel1 channel2</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">发布信息， 返回整数（多少个订阅者接收了）</span></span><br><span class="line">PUBLISH channel1 helloworld</span><br></pre></td></tr></table></figure>
+
+<h1 id="Redis-Jedis"><a href="#Redis-Jedis" class="headerlink" title="Redis_Jedis"></a>Redis_Jedis</h1><h2 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--jedis依赖--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>redis.clients<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jedis<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.2.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> redis.clients.jedis.Jedis;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * jedis连接redis服务器</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * 密码连接</span></span><br><span class="line"><span class="comment"> * jedis.auth(&quot;123456&quot;);</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> arui</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Demo00_connect</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Jedis</span> <span class="variable">jedis</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Jedis</span>(<span class="string">&quot;localhost&quot;</span>, <span class="number">6379</span>);</span><br><span class="line">        <span class="type">String</span> <span class="variable">pong</span> <span class="operator">=</span> jedis.ping();</span><br><span class="line">        System.out.println(<span class="string">&quot;连接成功: &quot;</span>  + pong);</span><br><span class="line">        jedis.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Key操作"><a href="#Key操作" class="headerlink" title="Key操作"></a>Key操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 查询所有的key</span></span><br><span class="line">Set&lt;String&gt; keys = jedis.keys(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">System.out.println(keys);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断k1是否存在</span></span><br><span class="line"><span class="type">Boolean</span> <span class="variable">exists</span> <span class="operator">=</span> jedis.exists(<span class="string">&quot;k1&quot;</span>);</span><br><span class="line">System.out.println(exists);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ttl</span></span><br><span class="line"><span class="type">Long</span> <span class="variable">ttl</span> <span class="operator">=</span> jedis.ttl(<span class="string">&quot;k1&quot;</span>);</span><br><span class="line">System.out.println(ttl);</span><br><span class="line"></span><br><span class="line"><span class="comment">// get</span></span><br><span class="line"><span class="type">String</span> <span class="variable">v1</span> <span class="operator">=</span> jedis.get(<span class="string">&quot;k1&quot;</span>);</span><br><span class="line">System.out.println(v1);</span><br></pre></td></tr></table></figure>
+
+<h2 id="String-操作"><a href="#String-操作" class="headerlink" title="String 操作"></a>String 操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// String同时添加多个kv</span></span><br><span class="line"><span class="type">String</span> <span class="variable">mset</span> <span class="operator">=</span> jedis.mset(<span class="string">&quot;stu1&quot;</span>, <span class="string">&quot;jack&quot;</span>, <span class="string">&quot;stu2&quot;</span>, <span class="string">&quot;mike&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询多个值</span></span><br><span class="line">List&lt;String&gt; list = jedis.mget(<span class="string">&quot;stu1&quot;</span>, <span class="string">&quot;stu2&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="List操作"><a href="#List操作" class="headerlink" title="List操作"></a>List操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 插入多个value, 返回值是成功插入个数</span></span><br><span class="line"><span class="type">Long</span> <span class="variable">lpush</span> <span class="operator">=</span> jedis.lpush(<span class="string">&quot;students&quot;</span>, <span class="string">&quot;jack&quot;</span>, <span class="string">&quot;mike&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询list</span></span><br><span class="line">List&lt;String&gt; students = jedis.lrange(<span class="string">&quot;students&quot;</span>, <span class="number">0</span>, -<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Set操作"><a href="#Set操作" class="headerlink" title="Set操作"></a>Set操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 成功插入2个</span></span><br><span class="line"><span class="type">Long</span> <span class="variable">count</span> <span class="operator">=</span> jedis.sadd(<span class="string">&quot;id&quot;</span>, <span class="string">&quot;123&quot;</span>, <span class="string">&quot;123&quot;</span>, <span class="string">&quot;321&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询</span></span><br><span class="line">Set&lt;String&gt; ids = jedis.smembers(<span class="string">&quot;id&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Hash操作"><a href="#Hash操作" class="headerlink" title="Hash操作"></a>Hash操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, String&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">map.put(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;jack&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;age&quot;</span>, <span class="string">&quot;22&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;gender&quot;</span>, <span class="string">&quot;male&quot;</span>);</span><br><span class="line"><span class="comment">// hmset 可以添加多个属性； hset 只能添加一个属性</span></span><br><span class="line">jedis.hmset(<span class="string">&quot;user&quot;</span>, map);</span><br><span class="line"></span><br><span class="line">Map&lt;String, String&gt; map1 = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">map1.put(<span class="string">&quot;hello&quot;</span>, <span class="string">&quot;world&quot;</span>);</span><br><span class="line">jedis.hset(<span class="string">&quot;user&quot;</span>, map1);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询user所有的属性值</span></span><br><span class="line">List&lt;String&gt; list = jedis.hvals(<span class="string">&quot;user&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="ZSet操作"><a href="#ZSet操作" class="headerlink" title="ZSet操作"></a>ZSet操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, Double&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">map.put(<span class="string">&quot;jack&quot;</span>, <span class="number">90.0</span>);</span><br><span class="line">map.put(<span class="string">&quot;mike&quot;</span>, <span class="number">100.0</span>);</span><br><span class="line"><span class="comment">// 添加多个成员 zadd(String key, Map&lt;String, Double&gt; scoreMembers)</span></span><br><span class="line">jedis.zadd(<span class="string">&quot;tpn&quot;</span>, map);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加单个成员</span></span><br><span class="line">jedis.zadd(<span class="string">&quot;tpn&quot;</span>, <span class="number">70</span>, <span class="string">&quot;rose&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询</span></span><br><span class="line">Set&lt;String&gt; list = jedis.zrange(<span class="string">&quot;tpn&quot;</span>, <span class="number">0</span>, -<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<h1 id="Redis-SpringBoot"><a href="#Redis-SpringBoot" class="headerlink" title="Redis_SpringBoot"></a>Redis_SpringBoot</h1><h2 id="api封装"><a href="#api封装" class="headerlink" title="api封装"></a>api封装</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">opsForValue --&gt; String操作</span><br><span class="line">opsForList --&gt; List操作</span><br><span class="line">opsForHash --&gt; Hash操作</span><br><span class="line">opsForSet --&gt; Set操作</span><br><span class="line">opsForZSet --&gt; ZSet操作</span><br></pre></td></tr></table></figure>
+
+<h2 id="依赖-1"><a href="#依赖-1" class="headerlink" title="依赖"></a>依赖</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-data-redis<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 连接池--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.commons<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>commons-pool2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.6.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.fasterxml.jackson.annotation.JsonAutoDetect;</span><br><span class="line"><span class="keyword">import</span> com.fasterxml.jackson.annotation.PropertyAccessor;</span><br><span class="line"><span class="keyword">import</span> com.fasterxml.jackson.databind.ObjectMapper;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cache.CacheManager;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cache.annotation.CachingConfigurerSupport;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cache.annotation.EnableCaching;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Bean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Configuration;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.cache.RedisCacheConfiguration;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.cache.RedisCacheManager;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.connection.RedisConnectionFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.core.RedisTemplate;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.serializer.RedisSerializationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.serializer.RedisSerializer;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.redis.serializer.StringRedisSerializer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"></span><br><span class="line"><span class="meta">@EnableCaching</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RedisConfig</span> <span class="keyword">extends</span> <span class="title class_">CachingConfigurerSupport</span> &#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> RedisTemplate&lt;String, Object&gt; <span class="title function_">redisTemplate</span><span class="params">(RedisConnectionFactory factory)</span> &#123;</span><br><span class="line">        RedisTemplate&lt;String, Object&gt; template = <span class="keyword">new</span> <span class="title class_">RedisTemplate</span>&lt;&gt;();</span><br><span class="line">        RedisSerializer&lt;String&gt; redisSerializer = <span class="keyword">new</span> <span class="title class_">StringRedisSerializer</span>();</span><br><span class="line">        <span class="type">Jackson2JsonRedisSerializer</span> <span class="variable">jackson2JsonRedisSerializer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Jackson2JsonRedisSerializer</span>(Object.class);</span><br><span class="line">        <span class="type">ObjectMapper</span> <span class="variable">om</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectMapper</span>();</span><br><span class="line">        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);</span><br><span class="line">        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);</span><br><span class="line">        jackson2JsonRedisSerializer.setObjectMapper(om);</span><br><span class="line">        template.setConnectionFactory(factory);</span><br><span class="line">        <span class="comment">//key 序列化方式</span></span><br><span class="line">        template.setKeySerializer(redisSerializer);</span><br><span class="line">        <span class="comment">//value 序列化</span></span><br><span class="line">        template.setValueSerializer(jackson2JsonRedisSerializer);</span><br><span class="line">        <span class="comment">//value hashmap 序列化</span></span><br><span class="line">        template.setHashValueSerializer(jackson2JsonRedisSerializer);</span><br><span class="line">        <span class="keyword">return</span> template;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> CacheManager <span class="title function_">cacheManager</span><span class="params">(RedisConnectionFactory factory)</span> &#123;</span><br><span class="line">        RedisSerializer&lt;String&gt; redisSerializer = <span class="keyword">new</span> <span class="title class_">StringRedisSerializer</span>();</span><br><span class="line">        <span class="type">Jackson2JsonRedisSerializer</span> <span class="variable">jackson2JsonRedisSerializer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Jackson2JsonRedisSerializer</span>(Object.class);</span><br><span class="line">        <span class="comment">//解决查询缓存转换异常的问题</span></span><br><span class="line">        <span class="type">ObjectMapper</span> <span class="variable">om</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectMapper</span>();</span><br><span class="line">        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);</span><br><span class="line">        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);</span><br><span class="line">        jackson2JsonRedisSerializer.setObjectMapper(om);</span><br><span class="line">        <span class="comment">// 配置序列化（解决乱码的问题）,过期时间 600 秒</span></span><br><span class="line">        <span class="type">RedisCacheConfiguration</span> <span class="variable">config</span> <span class="operator">=</span></span><br><span class="line">                RedisCacheConfiguration.defaultCacheConfig()</span><br><span class="line">                        .entryTtl(Duration.ofSeconds(<span class="number">600</span>))</span><br><span class="line">                        .serializeKeysWith(RedisSerializationContext.SerializationPair.</span><br><span class="line">                                fromSerializer(redisSerializer))</span><br><span class="line">                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer))</span><br><span class="line">                        .disableCachingNullValues();</span><br><span class="line">        <span class="type">RedisCacheManager</span> <span class="variable">cacheManager</span> <span class="operator">=</span> RedisCacheManager.builder(factory)</span><br><span class="line">                .cacheDefaults(config)</span><br><span class="line">                .build();</span><br><span class="line">        <span class="keyword">return</span> cacheManager;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="控制器"><a href="#控制器" class="headerlink" title="控制器"></a>控制器</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * redis控制器</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> arui</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/redis&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RedisTestController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisTemplate redisTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">testRedis</span><span class="params">()</span>&#123;</span><br><span class="line">        redisTemplate.opsForValue().set(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;jack&quot;</span>);</span><br><span class="line">        <span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> (String) redisTemplate.opsForValue().get(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/28/JUC%E5%85%A5%E9%97%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2095,649 +2686,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/05/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4linux100%E8%AE%B2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="arui zhong">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="阿睿的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/11/05/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4linux100%E8%AE%B2/" class="post-title-link" itemprop="url">极客时间linux100讲</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-11-05 20:43:40" itemprop="dateCreated datePublished" datetime="2022-11-05T20:43:40+08:00">2022-11-05</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-11-14 23:43:19" itemprop="dateModified" datetime="2022-11-14T23:43:19+08:00">2022-11-14</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%8A%80%E6%9C%AF/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="系统操作"><a href="#系统操作" class="headerlink" title="系统操作"></a>系统操作</h1><h2 id="帮助命令-man-help-info"><a href="#帮助命令-man-help-info" class="headerlink" title="帮助命令 man help info"></a>帮助命令 man help info</h2><ul>
-<li><p><code>man</code> </p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">man ls</span><br><span class="line"></span><br><span class="line">man 7 man</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看第7章</span></span><br><span class="line">yum install man man-pages -y</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>help</code> </p>
-<p>shell自带的命令称为内部命令，其他的是外部命令</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">内部命令</span></span><br><span class="line">help cd</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">外部命令</span></span><br><span class="line">ls --help</span><br><span class="line"></span><br><span class="line">type cd </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可以查看是否内部命令</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>info</code> ， info比help更详细，作为help的帮助</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">info ls</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="基本操作命令"><a href="#基本操作命令" class="headerlink" title="基本操作命令"></a>基本操作命令</h2><ul>
-<li><p><code>pwd</code>  显示当前的目录名称</p>
-</li>
-<li><p><code>ls</code>  文件查看</p>
-</li>
-<li><p><code>cd</code>  更改当前的操作目录  </p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">来回切换目录</span></span><br><span class="line">cd - </span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>mkdir</code> 创建目录 ， <code>rm</code> 删除</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果存在不报错，创建多级目录</span></span><br><span class="line">mkdir -p a/b</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>cp</code> 复制， <code>mv</code> 移动</p>
-</li>
-<li><p><code>cat</code> 显示文本到结尾，<code>head</code> 查看开头默认10行， <code>tail</code> 查看结尾， <code>wc</code> 统计文件内容信息</p>
-</li>
-<li><p><code>tar</code> 打包命令</p>
-<p>参数：<code>c</code> 打包，<code>x</code> 解包 ，<code>f</code> 指定操作类型为文件 ， <code>z</code> gzip格式压缩和解压缩 ， <code>j</code> bzip格式</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将/etc目录打包成到 /tmp/etc-backup.tar</span></span><br><span class="line">tar -cf /tmp/etc-backup.tar /etc</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">打包压缩成gzip格式</span> </span><br><span class="line">tar -zcvf /tmp/etc-backup.tar.gz /etc</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">解压到<span class="built_in">test</span>目录下，<span class="built_in">test</span>目录必须先存在</span></span><br><span class="line">tar -zxvf xxxx.tar.gz -C ./test</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="vi编辑器"><a href="#vi编辑器" class="headerlink" title="vi编辑器"></a>vi编辑器</h2><ol>
-<li><p>正常模式 按esc</p>
-<ul>
-<li><code>hjkl </code>  光标左下上右</li>
-<li><code>yy </code>  复制 ；<code>2yy</code> 复制2行，包括光标所在行</li>
-<li><code>dd</code> 剪切</li>
-<li><code>p</code>  粘贴</li>
-<li><code>u</code>  撤销</li>
-<li><code>x</code>  删除单个字符</li>
-<li><code>r</code>  替换单个字符</li>
-<li><code>gg</code> 移动到第一行</li>
-<li><code>G</code> 移动最后一行； <code>100G</code> 移动第100行</li>
-<li><code>^</code> 移动到行首，<code>$</code> 移动到行尾</li>
-</ul>
-</li>
-<li><p>插入模式 按i等</p>
-<ul>
-<li><code>I</code> 进入最左侧</li>
-<li><code>a</code>  进入光标右边一位</li>
-<li><code>A</code> 进入最右侧</li>
-<li><code>o</code> 进入光标下一行</li>
-<li><code>O</code> 进入光标上一行</li>
-</ul>
-</li>
-<li><p>命令模式 按：</p>
-<ul>
-<li><p><code>:/</code> 查找， <code>n</code> 下一个， <code>N</code> 上一个</p>
-</li>
-<li><p><code>:s/old/new</code> 替换 </p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">光标所在行查找，并替换第一个</span></span><br><span class="line">:s/old/new</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">所有行查找，替换所有行的第一个</span></span><br><span class="line">:%s/old/new</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">全局替换</span> </span><br><span class="line">:%s/old/new/g</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第3到第5行替换</span></span><br><span class="line">:%3,5s/old/new</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>:%d</code>  删除所有行， <code>:1,3d</code> 删除1到3行</p>
-</li>
-<li><p><code>:!</code> 执行shell命令</p>
-</li>
-<li><p><code>:set</code> 设置命令</p>
-</li>
-</ul>
-</li>
-<li><p>可视模式 按v</p>
-<ul>
-<li><p><code>v</code>  字符可视模式</p>
-</li>
-<li><p><code>V</code> 行可视模式</p>
-</li>
-<li><p>ctrl+v 块可视模式（vim才支持，vi不支持</p>
-<p>类似列操作，光标先拉列，大写<code>I</code> 插入，连续两次按 <code>esc</code> 键</p>
-<p>小写<code>d</code> ，删除</p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="用户管理"><a href="#用户管理" class="headerlink" title="用户管理"></a>用户管理</h2><ul>
-<li><p>用户管理常用命令</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">useradd 新建用户</span><br><span class="line">userdel 删除用户 userdel -r xx 彻底删除</span><br><span class="line">passwd 修改用户密码</span><br><span class="line">usermod 修改用户属性 usermod -g group1 user1 # 将user1改到用户组group1下</span><br><span class="line">chage 修改用户属性</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">验证是否有哪个用户</span></span><br><span class="line">id root</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">uid=0(root) gid=0(root) 组=0(root)</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>组管理命令</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">groupadd groupName</span><br><span class="line">groupdel groupName</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>可以通过 <code>visudo</code> 命令或者编辑  <code>/etc/sudoers</code> 文件 ， 赋予普通用户特殊权限 sudo</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">arui ALL=(ALL) NOPASSWD:ALL</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">%</span><span class="language-bash">arui 表示用户组； arui表示用户</span></span><br><span class="line">All 表示所有的连接</span><br><span class="line">(ALL) 表示所有的操作</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="文件权限"><a href="#文件权限" class="headerlink" title="文件权限"></a>文件权限</h2><ul>
-<li><p>r 读 4</p>
-</li>
-<li><p>w 写 2</p>
-</li>
-<li><p>x 执行 1</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">u g o a是所有</span></span><br><span class="line">chmod u+x 文件或目录名 </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改属用户</span></span><br><span class="line">chown user1 文件或目录名  </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改属组</span></span><br><span class="line">chown :group1 文件或目录名 </span><br><span class="line">chgrp group1 文件或目录名</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="目录权限"><a href="#目录权限" class="headerlink" title="目录权限"></a>目录权限</h2><ul>
-<li>x 进入目录</li>
-<li>rx 显示目录内的文件名</li>
-<li>wx 修改目录内的文件名</li>
-</ul>
-<h1 id="系统管理"><a href="#系统管理" class="headerlink" title="系统管理"></a>系统管理</h1><h2 id="网络故障排除"><a href="#网络故障排除" class="headerlink" title="网络故障排除"></a>网络故障排除</h2><ul>
-<li><p>ping 网络是否通</p>
-</li>
-<li><p>traceroute 网络质量</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceroute -w 1 baidu.com # 只等待1秒</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>mtr 网络质量</p>
-</li>
-<li><p>nslookup 获得域名对应ip</p>
-</li>
-<li><p>telnet 端口是否通</p>
-</li>
-<li><p>tcpdump 抓取数据包</p>
-</li>
-<li><p>netstat 监听地址 <code>netstat -ntpl</code> </p>
-</li>
-<li><p>ss</p>
-</li>
-</ul>
-<h2 id="软件安装"><a href="#软件安装" class="headerlink" title="软件安装"></a>软件安装</h2><ul>
-<li>软件包管理器<ul>
-<li>CentOS、RedHat使用yum包管理器、软件安装包格式为rpm</li>
-<li>Debian、Ubuntu使用apt包管理器、软件安装包格式为deb</li>
-</ul>
-</li>
-</ul>
-<h3 id="rpm"><a href="#rpm" class="headerlink" title="rpm"></a>rpm</h3><blockquote>
-<p>rpm需要自己管理软件依赖关系</p>
-</blockquote>
-<ol>
-<li><p>rpm包格式</p>
-<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221103105353173.png" alt="image-20221103105353173"></p>
-</li>
-<li><p>rpm命令常用参数</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-q 查询软件包</span><br><span class="line">-i 安装软件包</span><br><span class="line">-e 卸载软件包</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h3 id="yum"><a href="#yum" class="headerlink" title="yum"></a>yum</h3><blockquote>
-<p>yum 帮助我们解决软件rpm包的依赖关系</p>
-<p>CentOS yum 源 <a target="_blank" rel="noopener" href="http://mirror.centos.org/centos/7/">http://mirror.centos.org/centos/7/</a></p>
-<p>国内镜像 <a target="_blank" rel="noopener" href="https://opsx.alibaba.com/mirror">https://opsx.alibaba.com/mirror</a></p>
-</blockquote>
-<ol>
-<li><p>配置国内yum仓库镜像</p>
-<ul>
-<li><p>yum配置文件<code>/etc/yum.repos.d/CentOS-Base.repo</code> </p>
-</li>
-<li><p>下载配置文件覆盖</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>yum makecache</code></p>
-</li>
-</ul>
-</li>
-<li><p>yum命令常用选项</p>
-<ul>
-<li>install 安装软件包</li>
-<li>remove 卸载软件包</li>
-<li>list | grouplist 查看软件包</li>
-<li>update 升级软件包</li>
-</ul>
-</li>
-</ol>
-<h3 id="源码编译安装"><a href="#源码编译安装" class="headerlink" title="源码编译安装"></a>源码编译安装</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">• wget https://openresty.org/download/openresty-1.15.8.1.tar.gz</span><br><span class="line">• tar -zxf openresty-VERSION.tar.gz</span><br><span class="line">• cd openresty-VERSION/ </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可能需要安装 gcc</span></span><br><span class="line">yum install gcc gcc-c++ -y</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">pcre库</span></span><br><span class="line">yum install pcre-devel -y</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">openssl</span></span><br><span class="line">sudo yum install openssl-devel -y</span><br><span class="line"></span><br><span class="line">• ./configure --prefix=/usr/local/openresty    # 指定安装目录</span><br><span class="line">• make -j2 # 使用2个逻辑cpu编译</span><br><span class="line">• make install</span><br></pre></td></tr></table></figure>
-
-<h3 id="升级内核"><a href="#升级内核" class="headerlink" title="升级内核"></a>升级内核</h3><ul>
-<li><p>rpm格式内核</p>
-<ul>
-<li><p>查看内核版本 <code>uname -r</code> </p>
-</li>
-<li><p>升级内核版本 <code>yum install kernel-3.10.0</code></p>
-</li>
-<li><p>升级（包括内核）已安装的其他软件包和补丁 <code>yum update</code></p>
-</li>
-</ul>
-</li>
-<li><p>源代码编译安装内核</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">• 安装依赖包</span><br><span class="line">• yum install gcc gcc-c++ make ncurses-devel openssl-devel elfutils-libelf-devel</span><br><span class="line">• 下载并解压缩内核</span><br><span class="line">• https://www.kernel.org</span><br><span class="line">• tar xvf linux-5.1.10.tar.xz -C /usr/src/kernels</span><br><span class="line"></span><br><span class="line">• 配置内核编译参数</span><br><span class="line">• cd /usr/src/kernels/linux-5.1.10/</span><br><span class="line">• make menuconfig | allyesconfig | allnoconfig</span><br><span class="line">• 使⽤当前系统内核配置</span><br><span class="line">• cp /boot/config-kernelversion.platform /usr/src/kernels/</span><br><span class="line">linux-5.1.10/.config</span><br><span class="line"></span><br><span class="line">• 查看 CPU</span><br><span class="line">• lscpu</span><br><span class="line">• 编译</span><br><span class="line">• make -j2 all</span><br><span class="line">• 安装内核</span><br><span class="line">• make modules_install</span><br><span class="line">• make install</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="进程管理"><a href="#进程管理" class="headerlink" title="进程管理"></a>进程管理</h2><h3 id="进程查看命令"><a href="#进程查看命令" class="headerlink" title="进程查看命令"></a>进程查看命令</h3><ul>
-<li><p><code>ps</code> </p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ps -e 查看所有进程</span><br><span class="line">ps -ef 查看所有进程更全面的信息 比如多了uid。ppid和cmd</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>top</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">load average: 平均负载，衡量系统的繁忙程度; 三个参数分别是 1分钟 5分钟 15分钟 的采样汇总</span><br><span class="line"><span class="meta prompt_">%</span><span class="language-bash">Cpu : cpu使用百分比; us是用户程序计算 sy是系统进程使用 <span class="built_in">id</span>空闲状态  wa cpu等待磁盘io百分比</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="进程设置优先级"><a href="#进程设置优先级" class="headerlink" title="进程设置优先级"></a>进程设置优先级</h3><ul>
-<li><p><code>nice</code> 范围从-20 到 19 ，对应 top 的 NI 值，值越⼩优先级越⾼，抢占资源就越多</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nice -n 10 xx.sh</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>renice </code>  重新设置优先级</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">renice -n 10 pid</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="进程作业控制"><a href="#进程作业控制" class="headerlink" title="进程作业控制"></a>进程作业控制</h3><ul>
-<li><p><code>&amp;</code> 符号， 将进程后台执行</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">./a.sh &amp;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">进程后台执行，并忽略挂起信号</span></span><br><span class="line">nohup ./a.sh &amp; </span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>jobs</code> 查看作业，</p>
-<ul>
-<li><code>fg</code> 加上 <code>jobs</code> 中的编号将进程调回到前台，</li>
-<li>ctl+z 将进程调回后台并挂起</li>
-<li><code>bg</code> 加上编号 ，将后台挂起的进程再次运行</li>
-</ul>
-</li>
-</ul>
-<h2 id="内存与磁盘管理"><a href="#内存与磁盘管理" class="headerlink" title="内存与磁盘管理"></a>内存与磁盘管理</h2><ul>
-<li><p>内存查看</p>
-<ul>
-<li><p><code>free</code> </p>
-</li>
-<li><p><code>top</code></p>
-</li>
-</ul>
-</li>
-<li><p>磁盘查看</p>
-<ul>
-<li><code>df -h</code> </li>
-<li><code>du -h</code> 查看文件大小</li>
-</ul>
-</li>
-</ul>
-<h1 id="shell"><a href="#shell" class="headerlink" title="shell"></a>shell</h1><h2 id="什么是shell"><a href="#什么是shell" class="headerlink" title="什么是shell"></a>什么是shell</h2><p>shell是命令解释器，用于解释用户对操作系统的操作，是用户和内核沟通的桥梁。</p>
-<p>centos 7 默认shell是bash</p>
-<h2 id="shell脚本格式"><a href="#shell脚本格式" class="headerlink" title="shell脚本格式"></a>shell脚本格式</h2><ol>
-<li><code>#!/bin/bash</code> 开头声明使用bash解释器</li>
-<li>’ # ‘ 注释</li>
-<li><code> chmod u+rx</code> 可执行权限</li>
-<li>执行命令  <code>./filename.sh</code></li>
-</ol>
-<h2 id="shell脚本不同执行方式，不同影响"><a href="#shell脚本不同执行方式，不同影响" class="headerlink" title="shell脚本不同执行方式，不同影响"></a>shell脚本不同执行方式，不同影响</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bash ./filename.sh # 不需要可执行权限；产生一个bash子进程去运行脚本</span><br><span class="line">./filename.sh # 脚本需要可执行权限；会产生一个子进程去执行脚本</span><br><span class="line"></span><br><span class="line">source filename.sh # 当前进程执行，cd命令会进入文件夹，脚本会对当前的进程产生影响</span><br><span class="line">. filename.sh # 同上</span><br></pre></td></tr></table></figure>
-
-<h2 id="重定向"><a href="#重定向" class="headerlink" title="重定向"></a>重定向</h2><p>一个进程默认会打开标准输入0，标准输出1、错误输出2三个文件描述符fd</p>
-<ol>
-<li><p>输入重定向符号 <code>&quot;&lt;&quot;</code>， 通过读文件代替键盘输入</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">read var &lt; word.txt</span><br><span class="line">echo $var</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>输出重定向符号 标准输出<code>&quot;&gt;&quot; ； 错误输出 &quot;2&gt;&quot;；   两者都输出&quot;&amp;&gt;&quot;</code> </p>
-<ul>
-<li>“&gt;” 会覆盖文件</li>
-<li>“&gt;&gt;” 追加输出文件</li>
-</ul>
-</li>
-</ol>
-<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><h3 id="变量定义"><a href="#变量定义" class="headerlink" title="变量定义"></a>变量定义</h3><p>变量的命名规则：</p>
-<ol>
-<li>字母、数字、下划线</li>
-<li>不以数字开头</li>
-</ol>
-<h3 id="变量的赋值"><a href="#变量的赋值" class="headerlink" title="变量的赋值"></a>变量的赋值</h3><ul>
-<li><p>变量名&#x3D;变量值</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a=123</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>将命令结果赋值给变量，使用<code>$()</code> 或者飘号 &#96;&#96;</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">letc=$(ll)</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>变量值有空格等特殊字符，可以包括在双引号<code>&quot;&quot;</code>或者单引号 <code>&#39;&#39;</code>中</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">word=&quot;hello world&quot;</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="变量的引用"><a href="#变量的引用" class="headerlink" title="变量的引用"></a>变量的引用</h3><ul>
-<li><p><code>$&#123;变量名&#125; </code> 称作对变量的引用，部分情况下可以省略为 <code>$变量名</code></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">world=&quot;hello world&quot;</span><br><span class="line">echo $world123 </span><br><span class="line"># 楼上命令报错，没有变量world123</span><br><span class="line">echo $&#123;world&#125;123</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="变量的作用范围"><a href="#变量的作用范围" class="headerlink" title="变量的作用范围"></a>变量的作用范围</h3><ul>
-<li><p>变量的默认范围是当前shell</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">testw=&quot;hello&quot;</span><br><span class="line">bash</span><br><span class="line">echo $testw # 输出为空</span><br><span class="line">exit </span><br><span class="line">echo $testw # 输出hello</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>变量暴露给子shell</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export testval=&quot;hello world&quot;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>变量删除</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">unset testval</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>子shell使用父shell变量</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">source subshell.sh</span><br><span class="line"># 或者</span><br><span class="line">. subshell.sh</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="环境变量、预定义变量、位置变量"><a href="#环境变量、预定义变量、位置变量" class="headerlink" title="环境变量、预定义变量、位置变量"></a>环境变量、预定义变量、位置变量</h3><ol>
-<li><strong>环境变量</strong></li>
-</ol>
-<ul>
-<li>set 和 env 命令 查看变量</li>
-<li><code>$PATH</code> 命令搜索路径</li>
-</ul>
-<ol start="2">
-<li><strong>预定义变量</strong></li>
-</ol>
-<ul>
-<li><code>$?</code> 返回结果0是指上一条命令执行成功，其他是执行失败</li>
-<li><code>$$</code> 返回进程id</li>
-<li><code>$0</code> 返回当前进程名称</li>
-</ul>
-<ol start="3">
-<li><strong>位置变量</strong></li>
-</ol>
-<ul>
-<li><p><code>$1 $2 ...$9 $&#123;10&#125;</code>  读取脚本参数1-到10位</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">value=$&#123;2-other&#125; # 如果第二个参数为空，则替换为 &quot;other&quot;</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="环境变量配置文件"><a href="#环境变量配置文件" class="headerlink" title="环境变量配置文件"></a>环境变量配置文件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/etc/profile</span><br><span class="line">/etc/profile.d/</span><br><span class="line">~/.bash_profile</span><br><span class="line">~/.bashrc</span><br><span class="line">/etc/bashrc</span><br></pre></td></tr></table></figure>
-
-<p><strong>新增环境变量建议：</strong></p>
-<ol>
-<li><p>在 <code>/etc/profile.d/</code> 文件自己的脚本 <code>myenv.sh</code></p>
-</li>
-<li><p>编辑改文件新增环境变量</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># JAVA_HOME</span><br><span class="line">export JAVA_HOME=/opt/module/jdk1.8.0_212</span><br><span class="line">export PATH=$PATH:$JAVA_HOME/bin</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>是改环境变量生效</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source /etc/profile.d/myenv.sh</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h2 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h2><ul>
-<li><p>定义数组</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arr=（1 2 3）</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>输出所有的元素</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo $&#123;arr[@]&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>输出元素个数</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo $&#123;#arr[@]&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>输出指定位置元素</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 输出第一个元素</span><br><span class="line">echo $&#123;arr[0]&#125; </span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="引用符号"><a href="#引用符号" class="headerlink" title="引用符号"></a>引用符号</h2><ul>
-<li><p>双引号（不完全引用）</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var1=123</span><br><span class="line">echo &quot;$var1&quot;</span><br><span class="line"># 结果是 123</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>单引号(完全引用)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var1=123</span><br><span class="line">echo &#x27;$var1&#x27;</span><br><span class="line"># 结果是 $var1</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>飘号 &#96;&#96;执行命令</p>
-</li>
-</ul>
-<h2 id="整数运算"><a href="#整数运算" class="headerlink" title="整数运算"></a>整数运算</h2><ul>
-<li><p><code>expr</code> 运算</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">expr 1 + 2</span><br><span class="line"># 返回3 ， 注意每个字符之间都需要空格</span><br><span class="line"></span><br><span class="line"># `expr` 运算赋值通过飘号</span><br><span class="line">num1=`expr 1 + 2`</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>圆括号</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">((a=1+2))</span><br><span class="line">echo $a</span><br><span class="line"># 返回3</span><br><span class="line"># 或者</span><br><span class="line">echo $((1+2))</span><br><span class="line"></span><br><span class="line"># 自增</span><br><span class="line">((a++))</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="特殊符号小总结"><a href="#特殊符号小总结" class="headerlink" title="特殊符号小总结"></a>特殊符号小总结</h2><h3 id="圆括号"><a href="#圆括号" class="headerlink" title="圆括号()"></a>圆括号()</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># 数组</span><br><span class="line">arr=(1 2 3)</span><br><span class="line"></span><br><span class="line"># 命令赋值</span><br><span class="line">cmd1=$(ls)</span><br><span class="line"></span><br><span class="line"># 运算</span><br><span class="line">echo $((1+2))</span><br><span class="line"></span><br><span class="line"># 判断</span><br><span class="line">(( 5 &gt; 4 ))</span><br><span class="line">echo $?</span><br></pre></td></tr></table></figure>
-
-<h3 id="方括号"><a href="#方括号" class="headerlink" title="方括号[]"></a>方括号[]</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 判断</span><br><span class="line">[ 5 -gt 4 ]</span><br><span class="line">echo $?</span><br><span class="line"># 结果 0</span><br><span class="line"></span><br><span class="line">[[ 5 &gt; 4 ]]</span><br></pre></td></tr></table></figure>
-
-<h3 id="花括号"><a href="#花括号" class="headerlink" title="花括号{}"></a>花括号{}</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 表示数字范围</span><br><span class="line">echo &#123;0..9&#125;</span><br><span class="line"># 结果输出 0到9</span><br><span class="line"></span><br><span class="line"># 重复部分简写</span><br><span class="line">cp -v word.txt word.txt</span><br><span class="line">cp -v word.txt&#123;,.bak&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="test判断"><a href="#test判断" class="headerlink" title="test判断"></a>test判断</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">man test</span><br><span class="line"></span><br><span class="line"># 判断是否文件</span><br><span class="line">test -f /etc/passwd</span><br><span class="line"></span><br><span class="line"># 简写</span><br><span class="line">[ -f /etc/passwd ]</span><br><span class="line">echo $?</span><br><span class="line"># 成功输出0</span><br></pre></td></tr></table></figure>
-
-<h2 id="if-then语句"><a href="#if-then语句" class="headerlink" title="if-then语句"></a>if-then语句</h2><p>格式</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if [ 测试条件成立 ] 或命令返回值是否为0</span><br><span class="line">then 执行相应命令</span><br><span class="line">fi 结束</span><br></pre></td></tr></table></figure>
-
-<p>或者美化格式</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if [ 条件 ] ; then</span><br><span class="line">   echo &quot;yes&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
-
-<h2 id="if-then-else-语句"><a href="#if-then-else-语句" class="headerlink" title="if-then-else 语句"></a>if-then-else 语句</h2><p>格式</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if [ 测试条件成立 ]</span><br><span class="line">then 执行相应命令</span><br><span class="line">else 测试条件不成立，执行相应命令</span><br><span class="line">fi 结束</span><br></pre></td></tr></table></figure>
-
-<p>或者</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if [ 条件 ] ; then</span><br><span class="line">   echo &quot;yes&quot;</span><br><span class="line">else</span><br><span class="line">   echo &quot;no&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
-
-<h2 id="if-elif-else-语句"><a href="#if-elif-else-语句" class="headerlink" title="if-elif-else 语句"></a>if-elif-else 语句</h2><p>格式</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">if [ 条件1 ] ; then</span><br><span class="line">   echo &quot;yes&quot;</span><br><span class="line">elif [条件2 ] ; then</span><br><span class="line">   echo &quot;yes&quot;</span><br><span class="line">else</span><br><span class="line">   echo &quot;no&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
-
-<h2 id="if嵌套"><a href="#if嵌套" class="headerlink" title="if嵌套"></a>if嵌套</h2><p>格式</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if [ 条件1 ] ; then</span><br><span class="line">	if [ 条件2 ] ; then</span><br><span class="line">	 	echo &quot;if嵌套&quot;</span><br><span class="line">	 fi</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
-
-<h2 id="case-语句"><a href="#case-语句" class="headerlink" title="case 语句"></a>case 语句</h2><p>格式</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">case &quot;$变量&quot; in</span><br><span class="line">	&quot;情况1&quot; )</span><br><span class="line">		命令... </span><br><span class="line">		;;</span><br><span class="line">	&quot;情况2&quot; )</span><br><span class="line">		命令... </span><br><span class="line">		;;</span><br><span class="line">	 * )</span><br><span class="line">	 echo &quot;others&quot; </span><br><span class="line">	 ;;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure>
-
-<h2 id="for-循环格式"><a href="#for-循环格式" class="headerlink" title="for 循环格式"></a>for 循环格式</h2><ul>
-<li>遍历列表格式</li>
-</ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">for 参数 in 列表</span><br><span class="line">  do 执行的命令</span><br><span class="line">done 结束</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">列表可以是多个变量（空格隔开）、或者命令执行结果等</span></span><br><span class="line">for i in 1 2 3</span><br><span class="line">for i in &#123;1..9&#125;</span><br><span class="line">for i in `ls`</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>循环遍历格式</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">for (( i=1 ; i&lt;=10 ; i++ ))</span><br><span class="line">do</span><br><span class="line">  echo $i</span><br><span class="line">done</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="while-循环"><a href="#while-循环" class="headerlink" title="while 循环"></a>while 循环</h2><p>格式</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">while test判断条件</span><br><span class="line">do</span><br><span class="line">  命令</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">while :</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">等于 <span class="keyword">while</span> <span class="literal">true</span></span></span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>until循环格式（条件为真，结束循环）</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">until test判断条件</span><br><span class="line">do</span><br><span class="line">  命令</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
-
-<h2 id="位置参数"><a href="#位置参数" class="headerlink" title="位置参数"></a>位置参数</h2><ul>
-<li><p><code>$0</code> 表示脚本名称</p>
-</li>
-<li><p><code>$1</code> 表示第一个参数</p>
-</li>
-<li><p><code>$*</code> 和 <code>$@</code> 表示所有的位置参数</p>
-</li>
-<li><p><code>$#</code> 表示位置参数的数量</p>
-</li>
-<li><p><code>shift</code> 参数左移，逐一处理参数</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">while [ $# -ge 1 ] ; do</span><br><span class="line">  echo $1</span><br><span class="line">  shift</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">./a.sh a b c </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">输出结果是 a b c</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="自定义函数"><a href="#自定义函数" class="headerlink" title="自定义函数"></a>自定义函数</h2><p>格式</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">function fname()&#123;</span><br><span class="line">  命令</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">简写</span></span><br><span class="line">fname() &#123;</span><br><span class="line">  命令</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">函数执行</span></span><br><span class="line">fname</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">取消函数</span></span><br><span class="line">unset</span><br></pre></td></tr></table></figure>
-
-<h2 id="定时任务"><a href="#定时任务" class="headerlink" title="定时任务"></a>定时任务</h2><ol>
-<li><p>一次性任务</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">at 8:00</span><br><span class="line">echo hello &gt;&gt; /tmp/hello.txt</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ctl+d 提交任务</span></span><br><span class="line"></span><br><span class="line">atq 查看定时任务</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>周期任务 cron</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 配置方式</span><br><span class="line">crontab -e</span><br><span class="line"></span><br><span class="line"># 查看现有的计划任务</span><br><span class="line">crontab -l</span><br><span class="line"></span><br><span class="line"># 配置格式</span><br><span class="line">分钟 小时 日期 月份 星期 执行的命令</span><br><span class="line"></span><br><span class="line"># 查看日志</span><br><span class="line">sudo tail -f /var/log/cron</span><br><span class="line"></span><br><span class="line"># 删除crontab</span><br><span class="line">crontab -e 将其命令删除即可</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h1 id="文本操作"><a href="#文本操作" class="headerlink" title="文本操作"></a>文本操作</h1><h2 id="元字符"><a href="#元字符" class="headerlink" title="元字符"></a>元字符</h2><ul>
-<li><p><code>.</code> 匹配除换行符外的任意单个字符</p>
-</li>
-<li><p><code>*</code> 匹配任意一个跟在它之前的字符</p>
-</li>
-<li><p><code>[]</code> 匹配括号中的字符类中的任意一个</p>
-</li>
-<li><p><code>^</code> 匹配开头</p>
-</li>
-<li><p><code>$</code> 匹配结尾</p>
-</li>
-<li><p><code>\</code> 转移后面的特殊字符</p>
-</li>
-</ul>
-<p><strong>拓展元字符</strong></p>
-<ul>
-<li><code>+</code> 匹配前面的正则表达式至少出现1次</li>
-<li><code>?</code> 匹配前面的正则表达式出现0次或1次</li>
-<li><code>|</code> 匹配前面或后面的正则表达式</li>
-</ul>
-<h2 id="文本内容查找grep"><a href="#文本内容查找grep" class="headerlink" title="文本内容查找grep"></a>文本内容查找grep</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">格式</span></span><br><span class="line">grep 选项 文本文件[可多个文本]</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">常用选项</span></span><br><span class="line">-i 忽略大小写</span><br><span class="line">-r 递归读所有子目录</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">grep 过滤符合条件的一行</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">标准匹配(包含hello的一行)</span></span><br><span class="line">grep hello ./helloworld.txt</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="文件查找命令find"><a href="#文件查找命令find" class="headerlink" title="文件查找命令find"></a>文件查找命令find</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">格式</span></span><br><span class="line">find 路径 查找条件[补充条件]</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">1对1的匹配</span></span><br><span class="line">find passwd</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找出/etc 下所有叫passwd的文件</span></span><br><span class="line">find /etc -name passwd</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">通配符</span></span><br><span class="line">find /etc -name pass*</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">正则表达式</span></span><br><span class="line">find /etc -regex .*wd</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">批量删除</span></span><br><span class="line">find *.txt -exec rm -v &#123;&#125; \;</span><br></pre></td></tr></table></figure>
-
-<h2 id="sed"><a href="#sed" class="headerlink" title="sed"></a>sed</h2><h3 id="替换命令s"><a href="#替换命令s" class="headerlink" title="替换命令s"></a>替换命令s</h3><p><strong>sed 行编辑器，一般用于对文本内容进行替换</strong></p>
-<p><strong>sed的基本工作方式：</strong></p>
-<ol>
-<li>将文件以行为单位读取到内存（模式空间）</li>
-<li>使用sed的每个脚本对该进行操作</li>
-<li>处理完成后输出该行</li>
-</ol>
-<p><strong>sed的替换命令s:</strong></p>
-<ul>
-<li>如果一行有多个old的元素，默认只替换第一个，<code>&#39;s/old/new/g&#39;</code>  全部都替换</li>
-</ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sed ’s/old/new/’ filename</span><br><span class="line">sed -e ’s/old/new/’ -e ’s/old/new/’ filename  …</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>如果old是特殊字符，可以使用！或者其他字符做分隔符</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;s!/!hello!&#x27; hello.txt</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>-i</code> 将替换的结果覆盖到源文件，上面两个操作对源文件没有影响</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i ’s/old/new/’ ’s/old/new/’ filename  …</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>带正则表达式的替换命令</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sed ’s/正则表达式/new/’ filename</span><br><span class="line"></span><br><span class="line">sed -r ’s/扩展正则表达式/new/’ filename</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>分组和回调</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将 abc 替换为 abc:abc  ;  \1 表示第1组</span></span><br><span class="line">sed -r &#x27;s/(abc)/\1:\1/&#x27; a.txt</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="替换命令加强版"><a href="#替换命令加强版" class="headerlink" title="替换命令加强版"></a>替换命令加强版</h3><ul>
-<li><p><strong>标志位</strong> <code>s/old/new/标志位</code> </p>
-<ol>
-<li>数字，第几次出现才进行替换</li>
-<li><code>s/old/new/g</code>  ，每次出现都替换</li>
-<li><code>s/old/new/p</code> ， p打印空间模式的内容</li>
-</ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将修改的行输出</span></span><br><span class="line">sed -n &#x27;s/aaa/bbb/p&#x27; a.txt</span><br></pre></td></tr></table></figure>
-
-<ol start="4">
-<li><code>s/old/new/w filename</code> ， 将模式空间的内容写入到文件</li>
-</ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将修改的这一行写入到 b.txt</span></span><br><span class="line">sed -n &#x27;s/aaa/bbb/w b.txt&#x27; a.txt</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>寻址</strong> 默认对每行进行操作，增加寻址后对匹配的行进行操作</p>
-<ol>
-<li><p><code>/正则表达式/s/old/new/g</code> </p>
-</li>
-<li><p><code>行号s/old/new/g</code>  </p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">指定第10行</span></span><br><span class="line">sed &#x27;10s/old/new/g&#x27;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第1行到第5行</span></span><br><span class="line">sed &#x27;1,5s/old/new/g&#x27;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第5行到最后一行</span></span><br><span class="line">sed &#x27;5,$s/old/new/g&#x27;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>两种寻址符号行号和正则可以一起用</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;/root/,$s/bash/!/g&#x27;</span><br></pre></td></tr></table></figure></li>
-</ol>
-</li>
-<li><p><strong>分组</strong></p>
-<p>寻址可以匹配多条命令</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/regular/&#123;s/old/new/ ; s/old/new/&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>脚本文件</strong></p>
-<p>可以将选项保存为文件，使用-f 加载脚本文件</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -f sedscript filename</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="sed的其他常用命令"><a href="#sed的其他常用命令" class="headerlink" title="sed的其他常用命令"></a>sed的其他常用命令</h3><ul>
-<li><p><strong>删除命令</strong> <code>[寻址]d</code> </p>
-<p>删除模式空间内容，改变脚本的控制流，重新读取输入行</p>
-<p>即将匹配的所在行删除</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将aa所在行的模式空间删除</span></span><br><span class="line">sed &#x27;/aa/d&#x27; a.txt</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>追加插入和更改</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">追加a 在匹配的下一行插入 hello</span></span><br><span class="line">sed &#x27;/aa/a hello&#x27; a.txt</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">插入i 在匹配的上一行插入</span></span><br><span class="line">sed &#x27;/aa/i hello&#x27; a.txt</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更改c 将匹配的所在行更换为hello</span></span><br><span class="line">sed &#x27;/aa/c hello&#x27; a.txt</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>读文件</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将文件data.txt 读入到a.txt 的 匹配行下，合成一个文件</span></span><br><span class="line">sed &#x27;/a/r data.txt&#x27; a.txt </span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="AWK"><a href="#AWK" class="headerlink" title="AWK"></a>AWK</h2><h3 id="认识AWK"><a href="#认识AWK" class="headerlink" title="认识AWK"></a>认识AWK</h3><p>AWK 一般用于对文本内容进行统计、按需要的格式进行输出</p>
-<ul>
-<li><strong>awk和sed区别</strong></li>
-</ul>
-<blockquote>
-<p>AWK更像是脚本语言， 用于比较规范的文本处理，用于统计数量并输出指定字段</p>
-<p>sed将不规范的文本，通过替换等处理为比较规范的文本</p>
-</blockquote>
-<ul>
-<li><p><strong>记录和字段</strong></p>
-<ol>
-<li>每行称为awk的记录</li>
-<li>使用空格、制表符分隔开的单词称作字段</li>
-<li>可以自己指定分隔的字段</li>
-</ol>
-</li>
-<li><p><strong>字段的引用</strong></p>
-<ol>
-<li><p>awk中使用 <code>$1 $2 .. $n</code> 表示每一个字段， <code>$0</code> 表示整行</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">awk &#x27;&#123;print $1,$2,$3&#125;&#x27; filename</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>awk 可以使用 <code>-F</code> 选项来指定分隔符</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">awk -F &#x27;,&#x27; &#x27;&#123;print $1,$2,$3&#125;&#x27; filename</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>可以使用正则表达式</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">awk -F &#x27;,&#x27; &#x27;/wd$/&#123;print $1,$2,$3&#125;&#x27; filename</span><br></pre></td></tr></table></figure></li>
-</ol>
-</li>
-<li><p><strong>AWK 脚本的流程控制</strong></p>
-<ol>
-<li>输入数据前例程 <code>BEGIN&#123;&#125;</code></li>
-<li>主输入循环 {}</li>
-<li>所有文件读取完成例程 <code>END&#123;&#125;</code></li>
-</ol>
-</li>
-</ul>
-<h3 id="系统变量"><a href="#系统变量" class="headerlink" title="系统变量"></a>系统变量</h3><ol>
-<li><p><strong><code>FS</code>  和 <code>OFS</code> 字段分隔符，<code>OFS</code>  表示输出的字段分隔符</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">head -5 /etc/passwd | awk &#x27;BEGIN&#123;FS=&quot;:&quot;&#125;&#123;print $1&#125;&#x27;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">等同</span></span><br><span class="line">head -5 /etc/passwd | awk -F &#x27;:&#x27; &#x27;&#123;print $1&#125;&#x27;</span><br><span class="line"></span><br><span class="line">head -5 /etc/passwd | awk &#x27;BEGIN&#123;FS=&quot;:&quot;;OFS=&quot;-&quot;&#125;&#123;print $1,$2&#125;&#x27;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">等同</span></span><br><span class="line">head -5 /etc/passwd | awk -F &#x27;:&#x27; &#x27;&#123;print $1 &quot;-&quot; $2&#125;&#x27;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong><code>RS</code> 记录分隔符（换行符）</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将 冒号 ： 作为换行符</span></span><br><span class="line">head -5 /etc/passwd | awk &#x27;BEGIN&#123;RS=&quot;:&quot;&#125;&#123;print $0&#125;&#x27;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong><code>NR</code>  和 <code>FNR</code> 行数</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">一个文件 两个一样，如果多个文件 FNR 分别显示各个文件的行号，NR 显示合并后的行号</span></span><br><span class="line">head -5 /etc/passwd | awk &#x27;&#123;print NR,$0&#125;&#x27;</span><br><span class="line"></span><br><span class="line">awk &#x27;&#123;print FNR,$0&#125;&#x27; /etc/hosts /etc/hosts</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong><code>NF</code> 字段数量，最后一个字段内容可以用 <code>$NF</code> 取出</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">head -5 /etc/passwd | awk -F &#x27;:&#x27; &#x27;&#123;print NF&#125;&#x27;</span><br><span class="line"></span><br><span class="line">head -5 /etc/passwd | awk -F &#x27;:&#x27; &#x27;&#123;print $NF&#125;&#x27;</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h3 id="awk的判断和循环"><a href="#awk的判断和循环" class="headerlink" title="awk的判断和循环"></a>awk的判断和循环</h3><ul>
-<li><p><strong>条件语句 if</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">if(表达式)</span><br><span class="line">   awk语句1</span><br><span class="line">[else</span><br><span class="line">   awk语句2</span><br><span class="line">]</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果有多个语句需要执行可以使用 &#123; &#125; 将多个语句括起来</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果第二个字段 &gt; 80 ，输出整行</span></span><br><span class="line">awk &#x27;&#123;if($2&gt;80) print $0&#125;&#x27; kpi.txt</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>循环</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="keyword">while</span> 循环</span></span><br><span class="line">while(表达式)</span><br><span class="line">  awk语句1</span><br><span class="line">    </span><br><span class="line">do&#123;</span><br><span class="line">  awk语句1</span><br><span class="line">&#125;while(表达式)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="keyword">for</span> 循环</span></span><br><span class="line">for(初始值;循环判断条件;累加)</span><br><span class="line">  awk语句1</span><br></pre></td></tr></table></figure></li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2807,20 +2755,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">12</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
