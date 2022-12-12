@@ -161,6 +161,197 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/06/git/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="arui zhong">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="阿睿的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/11/06/git/" class="post-title-link" itemprop="url">git</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-06 19:27:08" itemprop="dateCreated datePublished" datetime="2022-11-06T19:27:08+08:00">2022-11-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-14 23:42:58" itemprop="dateModified" datetime="2022-11-14T23:42:58+08:00">2022-11-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B7%A5%E5%85%B7/git/" itemprop="url" rel="index"><span itemprop="name">git</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="git-工作流程"><a href="#git-工作流程" class="headerlink" title="git 工作流程"></a>git 工作流程</h1><p><strong>工作区</strong>（写代码）&#x3D;&#x3D;<code>git add </code> &#x3D;&#x3D;&gt; </p>
+<p><strong>暂存区</strong>（临时存储）&#x3D;&#x3D; <code>git commit</code> &#x3D;&#x3D;&gt; </p>
+<p><strong>本地仓库</strong>（历史版本）&#x3D;&#x3D; <code>git push</code>&#x3D;&#x3D;&gt; <strong>远程库</strong></p>
+<h1 id="git常用命令"><a href="#git常用命令" class="headerlink" title="git常用命令"></a>git常用命令</h1><table>
+<thead>
+<tr>
+<th>说明</th>
+<th>命令</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>查看帮助</td>
+<td><code>git 操作 -help</code> 或者 <code>git 操作 --help</code></td>
+</tr>
+<tr>
+<td>设置用户签名</td>
+<td><code>git config --global[local] user.name xxx</code><br /><code>git config --global[local] user.email xxx</code> <br />global 是全局签名，local是某个仓库签名<br /><code>git config user.name</code> （查看签名</td>
+</tr>
+<tr>
+<td>初始化本地库</td>
+<td><code>git init</code>             生成<code>.git</code> 目录</td>
+</tr>
+<tr>
+<td>查看本地库状态</td>
+<td><code>git status</code></td>
+</tr>
+<tr>
+<td>添加到暂存区</td>
+<td><code>git add xxx</code> <br /><code>git add . </code>    （全部添加</td>
+</tr>
+<tr>
+<td>取消追踪</td>
+<td><code>git rm --cached xx</code><br /><code>git reset</code>                （还原最初状态，即退回全部</td>
+</tr>
+<tr>
+<td>提交到本地库</td>
+<td><code>git commit -m &quot;提交信息&quot; filename</code><br /><code>git commit -m &quot;提交信息&quot;</code>    （提交全部<br /><code>git commit -am &#39;提交信息&#39;</code> （文件已被追踪，可以 -am</td>
+</tr>
+<tr>
+<td>丢弃工作区的修改</td>
+<td><code>git restore xxx</code></td>
+</tr>
+<tr>
+<td>查看版本信息</td>
+<td><code>git reflog</code>    <br /><code>git log</code>      （更详细的版本信息</td>
+</tr>
+<tr>
+<td>版本切换</td>
+<td><code>git reset --hard 版本号</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>分支操作</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>创建分支</td>
+<td><code>git branch 分支名</code></td>
+</tr>
+<tr>
+<td>查看分支</td>
+<td><code>git branch -v</code></td>
+</tr>
+<tr>
+<td>切换分支</td>
+<td><code>git checkout 分支名</code></td>
+</tr>
+<tr>
+<td>合并分支</td>
+<td><code>git merge 分支名</code></td>
+</tr>
+<tr>
+<td>重命名分支</td>
+<td><code>git branch -M 重命名</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>远程仓库操作</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>克隆仓库到本地</td>
+<td><code>git clone 远程地址 [可以修改文件名]</code></td>
+</tr>
+<tr>
+<td>拉取远程仓库到本地</td>
+<td><code>git pull [别名] [分支]</code></td>
+</tr>
+<tr>
+<td>推送到远程仓库</td>
+<td><code>git push [别名][分支]</code></td>
+</tr>
+<tr>
+<td>连接远程仓库</td>
+<td><code>git remote add 别名 远程地址</code></td>
+</tr>
+<tr>
+<td>查看远程仓库</td>
+<td><code>git remote -v</code></td>
+</tr>
+</tbody></table>
+<p><strong>推荐：</strong></p>
+<ol>
+<li><p><a target="_blank" rel="noopener" href="https://git-scm.com/book/zh/v2">git-book</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://backlog.com/git-tutorial/cn/">猴子都能懂的GIT入门</a></p>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/05/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4linux100%E8%AE%B2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1032,20 +1223,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-count">13</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
