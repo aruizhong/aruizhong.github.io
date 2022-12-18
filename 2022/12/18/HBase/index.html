@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="HBase 概念及架构HBase 概念： hbase是基于hadoop的NoSQL数据库，在Hadoop和HDFS之上提供了类似Bigtable的功能。  支持分布式，可扩展的大数据存储，适合大数据随时读写的场景  支持数十亿行、百万列的数据存储   逻辑结构多维数据存储 按行拆分 按列拆分 一个 Region 中可以划分为多个 store ，存储在对应的 HFile 中   json数据1234">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HBase">
+<meta property="og:url" content="http://example.com/2022/12/18/HBase/index.html">
+<meta property="og:site_name" content="阿睿的博客">
+<meta property="og:description" content="HBase 概念及架构HBase 概念： hbase是基于hadoop的NoSQL数据库，在Hadoop和HDFS之上提供了类似Bigtable的功能。  支持分布式，可扩展的大数据存储，适合大数据随时读写的场景  支持数十亿行、百万列的数据存储   逻辑结构多维数据存储 按行拆分 按列拆分 一个 Region 中可以划分为多个 store ，存储在对应的 HFile 中   json数据1234">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221213190352238.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221213190538067.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221213190624434.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221213191426601.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221213193617995.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221215145324543.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221215150501400.png">
+<meta property="og:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221215150758032.png">
+<meta property="article:published_time" content="2022-12-18T14:12:02.000Z">
+<meta property="article:modified_time" content="2022-12-18T14:13:44.733Z">
+<meta property="article:author" content="arui zhong">
+<meta property="article:tag" content="HBase">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221213190352238.png">
+
+<link rel="canonical" href="http://example.com/2022/12/18/HBase/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>HBase | 阿睿的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">阿睿的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">keep going>>></p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/18/HBase/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="arui zhong">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="阿睿的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          HBase
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-12-18 22:12:02 / 修改时间：22:13:44" itemprop="dateCreated datePublished" datetime="2022-12-18T22:12:02+08:00">2022-12-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index"><span itemprop="name">HBase</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="HBase-概念及架构"><a href="#HBase-概念及架构" class="headerlink" title="HBase 概念及架构"></a>HBase 概念及架构</h1><h2 id="HBase-概念："><a href="#HBase-概念：" class="headerlink" title="HBase 概念："></a>HBase 概念：</h2><ul>
+<li><p>hbase是基于hadoop的NoSQL数据库，在Hadoop和HDFS之上提供了类似Bigtable的功能。</p>
+</li>
+<li><p>支持分布式，可扩展的大数据存储，适合大数据随时读写的场景</p>
+</li>
+<li><p>支持数十亿行、百万列的数据存储</p>
+</li>
+</ul>
+<h2 id="逻辑结构"><a href="#逻辑结构" class="headerlink" title="逻辑结构"></a>逻辑结构</h2><h3 id="多维数据存储"><a href="#多维数据存储" class="headerlink" title="多维数据存储"></a>多维数据存储</h3><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221213190352238.png" alt="image-20221213190352238"></p>
+<h3 id="按行拆分"><a href="#按行拆分" class="headerlink" title="按行拆分"></a>按行拆分</h3><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221213190538067.png" alt="image-20221213190538067"></p>
+<h3 id="按列拆分"><a href="#按列拆分" class="headerlink" title="按列拆分"></a>按列拆分</h3><ul>
+<li>一个 <code>Region</code> 中可以划分为多个 <code>store</code> ，存储在对应的 <code>HFile</code> 中</li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221213190624434.png" alt="image-20221213190624434"></p>
+<h3 id="json数据"><a href="#json数据" class="headerlink" title="json数据"></a>json数据</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">	<span class="attr">&quot;row_key1&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;personal_info&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">			<span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;zhangsan&quot;</span><span class="punctuation">,</span></span><br><span class="line">			<span class="attr">&quot;city&quot;</span><span class="punctuation">:</span> <span class="string">&quot;北京&quot;</span><span class="punctuation">,</span></span><br><span class="line">			<span class="attr">&quot;phone&quot;</span><span class="punctuation">:</span> <span class="string">&quot;131********&quot;</span></span><br><span class="line">		<span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;office_info&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">			<span class="attr">&quot;tel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;010-1111111&quot;</span><span class="punctuation">,</span></span><br><span class="line">			<span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;atguigu&quot;</span></span><br><span class="line">		<span class="punctuation">&#125;</span></span><br><span class="line">	<span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;row_key11&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;personal_info&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">			<span class="attr">&quot;city&quot;</span><span class="punctuation">:</span> <span class="string">&quot;上海&quot;</span><span class="punctuation">,</span></span><br><span class="line">			<span class="attr">&quot;phone&quot;</span><span class="punctuation">:</span> <span class="string">&quot;132********&quot;</span></span><br><span class="line">		<span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;office_info&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">			<span class="attr">&quot;tel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;010-1111111&quot;</span></span><br><span class="line">		<span class="punctuation">&#125;</span></span><br><span class="line">	<span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;row_key2&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">		......</span><br><span class="line">	<span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="物理存储结构"><a href="#物理存储结构" class="headerlink" title="物理存储结构"></a>物理存储结构</h2><ul>
+<li>在逻辑视图中可以看到空的单元格，实际上，hbase的物理存储是不存空数据的</li>
+<li>物理存储结构是 ：**<code>rowKey + 列族 + 字段名 + 时间戳 + 操作类型 + 数据 </code>**</li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221213191426601.png" alt="image-20221213191426601"></p>
+<h2 id="数据模型"><a href="#数据模型" class="headerlink" title="数据模型"></a>数据模型</h2><h3 id="NameSpace"><a href="#NameSpace" class="headerlink" title="NameSpace"></a>NameSpace</h3><p>命名空间，类似于关系型数据库的 database 概念，每个命名空间下有多个表。HBase 两 个自带的命名空间，分别是 <code>hbase 和 default</code>，hbase 中存放的是 HBase 内置的表，default表是用户默认使用的命名空间</p>
+<h3 id="Table"><a href="#Table" class="headerlink" title="Table"></a>Table</h3><p>类似于关系型数据库的表概念。不同的是，HBase 定义表时<strong>只需要声明列族</strong>即可，不需 要声明具体的列。因为数据存储时稀疏的，所有往 HBase 写入数据时，<strong>字段可以动态、按需指定</strong>。因此，和关系型数据库相比，HBase 能够轻松应对字段变更的场景</p>
+<h3 id="Row"><a href="#Row" class="headerlink" title="Row"></a>Row</h3><p>HBase 表中的每行数据都由一个 RowKey 和多个 Column（列）组成，数据是按照 RowKey 的字典顺序存储的，并且查询数据时<strong>只能根据 RowKey 进行检索</strong>，所以 RowKey 的设计十分重要。</p>
+<h3 id="Column"><a href="#Column" class="headerlink" title="Column"></a>Column</h3><p>HBase 中的每个列都由 Column Family(列族)和 Column Qualifier（列限定符）进行限定，例如 <code>info：name，info：age</code>。建表时，只需指明列族，而列限定符无需预先定义。</p>
+<h3 id="Time-Stamp"><a href="#Time-Stamp" class="headerlink" title="Time Stamp"></a>Time Stamp</h3><p>用于标识数据的不同版本（version），每条数据写入时，系统会自动为其加上该字段， 其值为写入 HBase 的时间；读数据时候，也是默认读取时间戳最新的数据</p>
+<h3 id="Cell"><a href="#Cell" class="headerlink" title="Cell"></a>Cell</h3><p>由{rowkey, column Family：column Qualifier, timestamp} 唯一确定的单元。cell 中的数据全部是字节码形式存贮。</p>
+<h2 id="HBase基础架构"><a href="#HBase基础架构" class="headerlink" title="HBase基础架构"></a>HBase基础架构</h2><p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221213193617995.png" alt="image-20221213193617995"></p>
+<h3 id="Master"><a href="#Master" class="headerlink" title="Master"></a>Master</h3><p>实现类为 HMaster，负责监控集群中所有的 RegionServer 实例。主要作用如下： </p>
+<p>（1）管理元数据表格 <code>hbase:meta</code>，接收用户对表格创建修改删除的命令并执行 </p>
+<p>（2）监控 region 是否需要进行负载均衡，故障转移和 region 的拆分。 通过启动多个后台线程监控实现上述功能： </p>
+<ul>
+<li>LoadBalancer 负载均衡器 周期性监控 region 分布在 regionServer 上面是否均衡，由参数 <code>hbase.balancer.period</code> 控制周期时间，默认 5 分钟。 </li>
+<li>CatalogJanitor 元数据管理器 定期检查和清理 hbase:meta 中的数据。meta 表内容在进阶中介绍。 </li>
+<li>MasterProcWAL master 预写日志处理器 把 master 需要执行的任务记录到预写日志 WAL 中，如果 master 宕机，让 backupMaster 读取日志继续干。</li>
+</ul>
+<h3 id="Region-Server"><a href="#Region-Server" class="headerlink" title="Region Server"></a>Region Server</h3><p>Region Server 实现类为 HRegionServer，主要作用如下: </p>
+<p>（1）负责数据 cell 的处理，例如写入数据 put，查询数据 get 等 </p>
+<p>（2）拆分合并 region 的实际执行者，有 master 监控，有 regionServer 执行。</p>
+<h3 id="Zookeeper"><a href="#Zookeeper" class="headerlink" title="Zookeeper"></a>Zookeeper</h3><ul>
+<li>HBase通过Zookeeper来做master的高可用、记录RegionServer 的部署信息、并且存储有meta表的位置信息。</li>
+<li>HBase 对于数据的读写操作时直接访问 Zookeeper 的，在 2.3 版本推出 Master Registry 模式，客户端可以直接访问 master。使用此功能，会加大对 master 的压力，减轻对 Zookeeper 的压力。</li>
+</ul>
+<h3 id="HDFS"><a href="#HDFS" class="headerlink" title="HDFS"></a>HDFS</h3><p>HDFS 为 Hbase 提供最终的底层数据存储服务，同时为 HBase 提供高容错的支持</p>
+<h1 id="HBase的Shell操作"><a href="#HBase的Shell操作" class="headerlink" title="HBase的Shell操作"></a>HBase的Shell操作</h1><h2 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h2><h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">集群启停</span></span><br><span class="line">bin/start-hbase.sh</span><br><span class="line">bin/stop-hbase.sh</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动单节点指定进程</span></span><br><span class="line">bin/hbase-daemon.sh start master</span><br><span class="line">bin/hbase-daemon.sh start regionserver</span><br></pre></td></tr></table></figure>
+
+<h3 id="进入HBase的shell客户端"><a href="#进入HBase的shell客户端" class="headerlink" title="进入HBase的shell客户端"></a>进入HBase的shell客户端</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/hbase shell</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221215145324543.png" alt="image-20221215145324543"></p>
+<h3 id="帮助命令"><a href="#帮助命令" class="headerlink" title="帮助命令"></a>帮助命令</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">help # 列出所有的命令组</span><br><span class="line">hellp &#x27;commond&#x27; # 查看具体的命令使用</span><br></pre></td></tr></table></figure>
+
+<h2 id="namespace-命令空间"><a href="#namespace-命令空间" class="headerlink" title="namespace 命令空间"></a>namespace 命令空间</h2><ul>
+<li><code>namespace</code> 类似MySQL中的数据库，默认有两个: <code>default</code> 和 <code>hbase</code></li>
+</ul>
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221215150501400.png" alt="image-20221215150501400"></p>
+<h3 id="创建namespace"><a href="#创建namespace" class="headerlink" title="创建namespace"></a>创建namespace</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">create_namespace &#x27;bigdata&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://aruizhong.oss-cn-shenzhen.aliyuncs.com/images/image-20221215150758032.png" alt="image-20221215150758032"></p>
+<h3 id="查看所有的namespace"><a href="#查看所有的namespace" class="headerlink" title="查看所有的namespace"></a>查看所有的namespace</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">list_namespace</span><br></pre></td></tr></table></figure>
+
+<h2 id="DDL"><a href="#DDL" class="headerlink" title="DDL"></a>DDL</h2><h3 id="创建表"><a href="#创建表" class="headerlink" title="创建表"></a>创建表</h3><h4 id="指定命令空间和版本数"><a href="#指定命令空间和版本数" class="headerlink" title="指定命令空间和版本数"></a>指定命令空间和版本数</h4><p>在 <code>ns1</code> 命令空间中创建表 <code>tb1</code> ；</p>
+<p>两个列族。<code>info</code> 列族数据维护的版本数为 5 个， 如果不写默认版本数为 1。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">create &#x27;bigdata:student&#x27;, &#123;NAME =&gt; &#x27;info&#x27;, VERSIONS =&gt; 5&#125;, &#123;NAME =&gt; &#x27;msg&#x27;&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="不指定命令空间和版本数"><a href="#不指定命令空间和版本数" class="headerlink" title="不指定命令空间和版本数"></a>不指定命令空间和版本数</h4><p>在 <code>default</code>  命名空间中创建表 <code>tb2</code> ， 共4个列族， 版本数都默认是 ·</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">create &#x27;tb2&#x27;, &#x27;f1&#x27;, &#x27;f2&#x27;, &#x27;f3&#x27;, &#x27;f4&#x27;, &#x27;f5&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看表"><a href="#查看表" class="headerlink" title="查看表"></a>查看表</h3><h4 id="list-查看所有的表"><a href="#list-查看所有的表" class="headerlink" title="list 查看所有的表"></a>list 查看所有的表</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">list</span><br></pre></td></tr></table></figure>
+
+<h4 id="desc-查看表结构"><a href="#desc-查看表结构" class="headerlink" title="desc 查看表结构"></a>desc 查看表结构</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">desc &#x27;tb1&#x27; # 查看 default命名空间的表 tb1</span><br><span class="line">desc &#x27;bigdata:student&#x27; # 查看 bigdata 命名空间的表 student</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改表结构"><a href="#修改表结构" class="headerlink" title="修改表结构"></a>修改表结构</h3><h4 id="增加列族和修改信息都使用覆盖的方法"><a href="#增加列族和修改信息都使用覆盖的方法" class="headerlink" title="增加列族和修改信息都使用覆盖的方法"></a>增加列族和修改信息都使用覆盖的方法</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">建表语句</span></span><br><span class="line">create &#x27;bigdata:student&#x27;, &#123;NAME =&gt; &#x27;info&#x27;, VERSIONS =&gt; 5&#125;, &#123;NAME =&gt; &#x27;msg&#x27;&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改语句 版本数改为6，覆盖之前的5</span></span><br><span class="line">alter &#x27;bigdata:student&#x27;, &#123;NAME =&gt; &#x27;info&#x27;, VERSIONS =&gt; 6&#125; </span><br></pre></td></tr></table></figure>
+
+<h4 id="删除列族"><a href="#删除列族" class="headerlink" title="删除列族"></a>删除列族</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">方式1</span></span><br><span class="line">alter &#x27;ns1:t1&#x27;, NAME =&gt; &#x27;f1&#x27;, METHOD =&gt; &#x27;delete&#x27;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">方式2</span></span><br><span class="line">alter &#x27;ns1:t1&#x27;, &#x27;delete&#x27; =&gt; &#x27;f1&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="删除表"><a href="#删除表" class="headerlink" title="删除表"></a>删除表</h3><ul>
+<li>先设置表不可用，再删除表</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">disable &#x27;t1&#x27;</span><br><span class="line">drop &#x27;t1&#x27;</span><br></pre></td></tr></table></figure>
+
+<h2 id="DML"><a href="#DML" class="headerlink" title="DML"></a>DML</h2><h3 id="写入数据"><a href="#写入数据" class="headerlink" title="写入数据"></a>写入数据</h3><ul>
+<li>数据是添加结构中最底层的 <code>cell</code>。可以手动写入时间戳指 定 cell 的版本，推荐不写默认使用当前的系统时间。</li>
+<li>如果重复写入相同 rowKey，相同列的数据，会写入多个版本进行覆盖。</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">rowKey为 1001</span></span><br><span class="line">put &#x27;bigdata:student&#x27;,&#x27;1001&#x27;,&#x27;info:name&#x27;,&#x27;zhangsan&#x27;</span><br><span class="line">put &#x27;bigdata:student&#x27;,&#x27;1001&#x27;,&#x27;info:name&#x27;,&#x27;lisi&#x27;</span><br><span class="line">put &#x27;bigdata:student&#x27;,&#x27;1001&#x27;,&#x27;info:age&#x27;,&#x27;18&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="读取数据"><a href="#读取数据" class="headerlink" title="读取数据"></a>读取数据</h3><h4 id="get-读取"><a href="#get-读取" class="headerlink" title="get 读取"></a>get 读取</h4><ul>
+<li>get 读取最大范围是<strong>一行数据</strong>，也可以进行<strong>列的过滤</strong>，读取数据的结果为多行 cell。</li>
+<li>也可以修改读取 cell 的版本数，默认读取一个。最多能够读取当前列族设置的维护版本数。</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">返回最新版本的数据</span></span><br><span class="line">get &#x27;bigdata:student&#x27;,&#x27;1001&#x27;</span><br><span class="line">get &#x27;bigdata:student&#x27;,&#x27;1001&#x27; , &#123;COLUMN =&gt; &#x27;info:name&#x27;&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">返回多个版本的数据</span></span><br><span class="line">get &#x27;bigdata:student&#x27;,&#x27;1001&#x27; , &#123;COLUMN =&gt; &#x27;info:name&#x27;, VERSIONS =&gt; 6&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="scan-扫描"><a href="#scan-扫描" class="headerlink" title="scan 扫描"></a>scan 扫描</h4><p>scan 能够读取多行数据，不建议扫描过多的数据，</p>
+<p>推荐使用 <code>startRow</code> 和 <code>stopRow</code> 来控制读取的数据，默认范围<strong>左闭右开</strong>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">扫描整张表</span></span><br><span class="line">scan &#x27;bigdata:student&#x27;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">扫描指定范围</span></span><br><span class="line">scan &#x27;bigdata:student&#x27;,&#123;STARTROW =&gt; &#x27;1001&#x27;,STOPROW =&gt; &#x27;1002&#x27;&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="删除数据"><a href="#删除数据" class="headerlink" title="删除数据"></a>删除数据</h3><h4 id="delete"><a href="#delete" class="headerlink" title="delete"></a>delete</h4><p>delete 表示删除一个版本的数据，即为 1 个 cell，不填写版本默认删除<strong>最新的一个版本</strong>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">delete &#x27;bigdata:student&#x27;,&#x27;1001&#x27;,&#x27;info:name&#x27;</span><br></pre></td></tr></table></figure>
+
+<h4 id="deleteall"><a href="#deleteall" class="headerlink" title="deleteall"></a>deleteall</h4><p>deleteall 表示<strong>删除所有版本</strong>的数据，即为<strong>当前行当前列的多个 cell</strong>。（执行命令会标记数据为要删除，不会直接将数据彻底删除，删除数据只在特定时期清理磁盘时进行）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">deleteall &#x27;bigdata:student&#x27;,&#x27;1001&#x27;,&#x27;info:name&#x27;</span><br></pre></td></tr></table></figure>
+
+<h1 id="API-操作"><a href="#API-操作" class="headerlink" title="API 操作"></a>API 操作</h1><h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p><a target="_blank" rel="noopener" href="https://hbase.apache.org/2.3/apidocs/index.html">官网API文档</a></p>
+<ul>
+<li>HBase中创建连接是一项重量级操作。连接实现是线程安全的，这样客户端就可以创建一次连接，并与不同的线程共享它。</li>
+<li>另一方面，{@link Table}和{@link Admin}实例是轻量级的线程安全的。通常，每个客户端应用程序实例化一个连接线程将获得自己的Table实例。{@link Table}和{@link Admin}的缓存或池化不建议使用。</li>
+<li><code>Table 接口</code> 封装了DML的api； <code>Admin 接口</code>封装了 DDL的api</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">Connection creation is a heavy-weight operation. Connection implementations are thread-safe,</span></span><br><span class="line"><span class="comment">so that the client can create a connection once, and share it with different threads.</span></span><br><span class="line"><span class="comment">&#123;<span class="doctag">@link</span> Table&#125; and &#123;<span class="doctag">@link</span> Admin&#125; instances, on the other hand, are light-weight and are not</span></span><br><span class="line"><span class="comment">thread-safe.  Typically, a single connection per client application is instantiated and every</span></span><br><span class="line"><span class="comment">thread will obtain its own Table instance. Caching or pooling of &#123;<span class="doctag">@link</span> Table&#125; and &#123;<span class="doctag">@link</span> Admin&#125;</span></span><br><span class="line"><span class="comment">is not recommended.</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="获得HBase连接"><a href="#获得HBase连接" class="headerlink" title="获得HBase连接"></a>获得HBase连接</h2><h3 id="工具类"><a href="#工具类" class="headerlink" title="工具类"></a>工具类</h3><ul>
+<li>由于HBase连接是重量级且线程安全的，可多线程共享连接，推荐使用类似单例模式的方式创建线程</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.Connection;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.ConnectionFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * hbase连接工具类</span></span><br><span class="line"><span class="comment"> * &lt;p&gt;</span></span><br><span class="line"><span class="comment"> * 由于HBase的连接是重量级且线程安全的，允许多线程共享，推荐使用单例模式</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> arui</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HBaseConnectUtil</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Connection connection;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            connection = ConnectionFactory.createConnection();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获得HBase连接，默认是同步连接</span></span><br><span class="line"><span class="comment">     *  </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Connection <span class="title function_">getConnection</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> connection;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 关闭hbase连接</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">close</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (connection != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                connection.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e.getMessage());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="默认配置文件"><a href="#默认配置文件" class="headerlink" title="默认配置文件"></a>默认配置文件</h3><p><code>hbase-site.xml</code> </p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;?xml-stylesheet type=<span class="string">&quot;text/xsl&quot;</span> href=<span class="string">&quot;configuration.xsl&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!--zk集群信息--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>hbase.zookeeper.quorum<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>hadoop102,hadoop103,hadoop104<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">description</span>&gt;</span>The directory shared by RegionServers.</span><br><span class="line">        <span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="POM-文件"><a href="#POM-文件" class="headerlink" title="POM 文件"></a>POM 文件</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.hbase<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hbase-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.4.11<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">exclusions</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">exclusion</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.glassfish<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javax.el<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">exclusion</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">exclusions</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.glassfish<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javax.el<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.0.1-b06<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.9<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="DDL-1"><a href="#DDL-1" class="headerlink" title="DDL"></a>DDL</h2><h3 id="创建命名空间"><a href="#创建命名空间" class="headerlink" title="创建命名空间"></a>创建命名空间</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">admin.createNamespace(descriptor);</span><br></pre></td></tr></table></figure>
+
+<h3 id="判断表是否存在"><a href="#判断表是否存在" class="headerlink" title="判断表是否存在"></a>判断表是否存在</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">admin.tableExists(table);</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建表-1"><a href="#创建表-1" class="headerlink" title="创建表"></a>创建表</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">admin.createTable(tableDesc);</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改列族的版本数"><a href="#修改列族的版本数" class="headerlink" title="修改列族的版本数"></a>修改列族的版本数</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">admin.modifyColumnFamily(table, columnFamilyDesc);</span><br></pre></td></tr></table></figure>
+
+<h3 id="删除表-1"><a href="#删除表-1" class="headerlink" title="删除表"></a>删除表</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">admin.deleteTable(table);</span><br></pre></td></tr></table></figure>
+
+<h2 id="DML-1"><a href="#DML-1" class="headerlink" title="DML"></a>DML</h2><h3 id="指定字段添加数据到cell中"><a href="#指定字段添加数据到cell中" class="headerlink" title="指定字段添加数据到cell中"></a>指定字段添加数据到cell中</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">table.put(put);</span><br></pre></td></tr></table></figure>
+
+<h3 id="查询指定字段的cell数据"><a href="#查询指定字段的cell数据" class="headerlink" title="查询指定字段的cell数据"></a>查询指定字段的cell数据</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Result</span> <span class="variable">result</span> <span class="operator">=</span> table.get(get);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 返回cell数组, result是一行cell的数组</span></span><br><span class="line">result.rawCells();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 解析cell</span></span><br><span class="line">CellUtil.cloneValue(cell);</span><br></pre></td></tr></table></figure>
+
+<h3 id="扫描数据-返回多行数据"><a href="#扫描数据-返回多行数据" class="headerlink" title="扫描数据(返回多行数据)"></a>扫描数据(返回多行数据)</h3><p>默认各行返回都是最新版本的一条数据</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ResultScanner</span> <span class="variable">scanner</span> <span class="operator">=</span> table.getScanner(scan);</span><br><span class="line"></span><br><span class="line"><span class="comment">// scanner 是多行的cell数组，即二维数组</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="按字段过滤扫描"><a href="#按字段过滤扫描" class="headerlink" title="按字段过滤扫描"></a>按字段过滤扫描</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">scan.setFilter(filterList);</span><br><span class="line"><span class="comment">// 返回单列过滤扫描 ColumnValueFilter</span></span><br><span class="line"><span class="comment">// 返回整行的过滤器 SingleColumnValueFilter</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="删除指定列"><a href="#删除指定列" class="headerlink" title="删除指定列"></a>删除指定列</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">table.delete(delete);</span><br></pre></td></tr></table></figure>
+
+<h2 id="DDL-综合代码"><a href="#DDL-综合代码" class="headerlink" title="DDL 综合代码"></a>DDL 综合代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * DDL 操作，先获取 Admin实例</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> arui</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DDL_DEMO</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 创建命名空间</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> namespace</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">createNamespace</span><span class="params">(String namespace)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">Admin</span> <span class="variable">admin</span> <span class="operator">=</span> HBaseConnectUtil.getConnection().getAdmin();</span><br><span class="line"></span><br><span class="line">        <span class="type">NamespaceDescriptor</span> <span class="variable">descriptor</span> <span class="operator">=</span> NamespaceDescriptor</span><br><span class="line">                .create(namespace)</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建命名空间</span></span><br><span class="line">        admin.createNamespace(descriptor);</span><br><span class="line"><span class="comment">//        admin.deleteNamespace(namespace); // 删除命名空间</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// admin也是连接资源，记得关闭</span></span><br><span class="line">        admin.close();</span><br><span class="line">        HBaseConnectUtil.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 判断表是否存在</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> namespace</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> tableName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">isExistsTable</span><span class="params">(String namespace, String tableName)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">Admin</span> <span class="variable">admin</span> <span class="operator">=</span> HBaseConnectUtil.getConnection().getAdmin();</span><br><span class="line"></span><br><span class="line">        <span class="type">TableName</span> <span class="variable">table</span> <span class="operator">=</span> TableName.valueOf(namespace, tableName);</span><br><span class="line">        <span class="comment">// 判断表是否存在</span></span><br><span class="line">        <span class="type">boolean</span> <span class="variable">b</span> <span class="operator">=</span> admin.tableExists(table);</span><br><span class="line">        System.out.println(b);</span><br><span class="line"></span><br><span class="line">        admin.close();</span><br><span class="line">        HBaseConnectUtil.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 创建表</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> namespace</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> tableName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> columnFamily</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">createTable</span><span class="params">(String namespace, String tableName, String columnFamily)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">Admin</span> <span class="variable">admin</span> <span class="operator">=</span> HBaseConnectUtil.getConnection().getAdmin();</span><br><span class="line"></span><br><span class="line">        <span class="type">TableDescriptor</span> <span class="variable">tableDesc</span> <span class="operator">=</span> TableDescriptorBuilder</span><br><span class="line">                .newBuilder(TableName.valueOf(namespace, tableName)) <span class="comment">// 设置 ns和tableName</span></span><br><span class="line">                .setColumnFamily( <span class="comment">// 设置列族名</span></span><br><span class="line">                        ColumnFamilyDescriptorBuilder</span><br><span class="line">                                .newBuilder(Bytes.toBytes(columnFamily))</span><br><span class="line">                                .setMaxVersions(<span class="number">5</span>) <span class="comment">// 设置版本号</span></span><br><span class="line">                                .build())</span><br><span class="line">                .build();</span><br><span class="line">        <span class="comment">// 创建表</span></span><br><span class="line">        admin.createTable(tableDesc);</span><br><span class="line"></span><br><span class="line">        admin.close();</span><br><span class="line">        HBaseConnectUtil.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 修改列族版本数</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> namespace</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> tableName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> columnFamily</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> newVersionNum</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">modifyColumnFamily</span><span class="params">(String namespace, String tableName, String columnFamily, Integer newVersionNum)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">Admin</span> <span class="variable">admin</span> <span class="operator">=</span> HBaseConnectUtil.getConnection().getAdmin();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 必须先获得原先的表，在原先的表基础上修改数据；否则报错找不到表</span></span><br><span class="line">        <span class="type">TableName</span> <span class="variable">table</span> <span class="operator">=</span> admin.getDescriptor(TableName.valueOf(namespace, tableName))</span><br><span class="line">                .getTableName();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="type">ColumnFamilyDescriptor</span> <span class="variable">columnFamilyDesc</span> <span class="operator">=</span> ColumnFamilyDescriptorBuilder.newBuilder(</span><br><span class="line">                Bytes.toBytes(columnFamily)</span><br><span class="line">        )</span><br><span class="line">                .setMaxVersions(newVersionNum) <span class="comment">// 设置新的列族版本数</span></span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 1. 修改列族版版本数</span></span><br><span class="line">        admin.modifyColumnFamily(table, columnFamilyDesc);</span><br><span class="line"></span><br><span class="line">        admin.close();</span><br><span class="line">        HBaseConnectUtil.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 删除表格</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> namespace</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> tableName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">deleteTable</span><span class="params">(String namespace, String tableName)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">Admin</span> <span class="variable">admin</span> <span class="operator">=</span> HBaseConnectUtil.getConnection().getAdmin();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 不写namespace，默认是default</span></span><br><span class="line">        <span class="type">TableName</span> <span class="variable">table</span> <span class="operator">=</span> TableName.valueOf(namespace, tableName);</span><br><span class="line"></span><br><span class="line">        admin.disableTable(table);</span><br><span class="line">        <span class="comment">// 删除表， 记得先disable表</span></span><br><span class="line">        admin.deleteTable(table);</span><br><span class="line"></span><br><span class="line">        admin.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="DML-综合代码"><a href="#DML-综合代码" class="headerlink" title="DML 综合代码"></a>DML 综合代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * dml操作api</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> arui</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DML_DEMO</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 插入数据</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> namespace</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> tableName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> rowKey</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> columnFamily</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> columnName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> value</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">putCell</span></span><br><span class="line">    <span class="params">(String namespace, String tableName, String rowKey, String columnFamily, String columnName, String value)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 0. 获得table对象（封装了dml的api的对象）</span></span><br><span class="line">        <span class="type">Table</span> <span class="variable">table</span> <span class="operator">=</span> HBaseConnectUtil</span><br><span class="line">                .getConnection()</span><br><span class="line">                .getTable(TableName.valueOf(namespace, tableName));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 封装cell数据</span></span><br><span class="line">        <span class="type">Put</span> <span class="variable">put</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Put</span>(Bytes.toBytes(rowKey))</span><br><span class="line">                .addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName), Bytes.toBytes(value));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 1. 指定字段添加cell数据</span></span><br><span class="line">        table.put(put);</span><br><span class="line"></span><br><span class="line">        table.close();</span><br><span class="line">        HBaseConnectUtil.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 查询指定字段</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> namespace</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> tableName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> rowKey</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> columnFamily</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> columnName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">getCells</span><span class="params">(</span></span><br><span class="line"><span class="params">            String namespace, String tableName, String rowKey, String columnFamily, String columnName)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">Table</span> <span class="variable">table</span> <span class="operator">=</span> HBaseConnectUtil.getConnection()</span><br><span class="line">                .getTable(TableName.valueOf(namespace, tableName));</span><br><span class="line"></span><br><span class="line">        <span class="type">Get</span> <span class="variable">get</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Get</span>(Bytes.toBytes(rowKey))</span><br><span class="line">                <span class="comment">// 查询指定字段</span></span><br><span class="line">                .addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName))</span><br><span class="line">                <span class="comment">// 读取所有版本的数据，如果不加便默认是读取最新的一个cell数据</span></span><br><span class="line">                .readAllVersions();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// get查询</span></span><br><span class="line">        <span class="type">Result</span> <span class="variable">result</span> <span class="operator">=</span> table.get(get);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 解析结果数据</span></span><br><span class="line">        <span class="keyword">for</span> (Cell cell : result.rawCells()) &#123;</span><br><span class="line">            <span class="comment">// Cell底层存储value是byte数组，需要工具解析</span></span><br><span class="line">            <span class="type">byte</span>[] valueBytes = CellUtil.cloneValue(cell);</span><br><span class="line">            System.out.println(<span class="keyword">new</span> <span class="title class_">String</span>(valueBytes));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        table.close();</span><br><span class="line">        HBaseConnectUtil.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 扫描数据</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> namespace</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> tableName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> startRow</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> stopRow</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">scanRows</span><span class="params">(</span></span><br><span class="line"><span class="params">            String namespace, String tableName, String startRow, String stopRow)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">Table</span> <span class="variable">table</span> <span class="operator">=</span> HBaseConnectUtil.getConnection()</span><br><span class="line">                .getTable(TableName.valueOf(namespace, tableName));</span><br><span class="line"></span><br><span class="line">        <span class="type">Scan</span> <span class="variable">scan</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scan</span>() <span class="comment">// 空参是直接扫描整张表</span></span><br><span class="line">                .withStartRow(Bytes.toBytes(startRow)) <span class="comment">// 左闭右开</span></span><br><span class="line">                .withStopRow(Bytes.toBytes(stopRow));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// scan扫描，</span></span><br><span class="line">        <span class="comment">// result是一行的cell的数组；scanner是多行的cell的数组，及相当于一个cell的二维数组</span></span><br><span class="line">        <span class="type">ResultScanner</span> <span class="variable">scanner</span> <span class="operator">=</span> table.getScanner(scan);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 解析scanner</span></span><br><span class="line">        <span class="keyword">for</span> (Result result : scanner) &#123;</span><br><span class="line">            <span class="keyword">for</span> (Cell cell : result.rawCells()) &#123;</span><br><span class="line">                System.out.print(<span class="keyword">new</span> <span class="title class_">String</span>(CellUtil.cloneRow(cell)) + <span class="string">&quot;\t&quot;</span>);</span><br><span class="line">                System.out.print(<span class="keyword">new</span> <span class="title class_">String</span>(CellUtil.cloneQualifier(cell)) + <span class="string">&quot;\t&quot;</span>);</span><br><span class="line">                System.out.print(<span class="keyword">new</span> <span class="title class_">String</span>(CellUtil.cloneValue(cell)) + <span class="string">&quot;\t&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        table.close();</span><br><span class="line">        HBaseConnectUtil.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 返回单列过滤扫描 ColumnValueFilter</span></span><br><span class="line"><span class="comment">     * 返回整行的过滤器 SingleColumnValueFilter</span></span><br><span class="line"><span class="comment">     * &lt;p&gt;</span></span><br><span class="line"><span class="comment">     * 扫描过滤的逻辑判断不是保留 “满足相等” 的情况，而是去掉不满足条件的数据；</span></span><br><span class="line"><span class="comment">     * 所以当该字段没有数据的话，整行也会被返回</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> namespace</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> tableName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> startRow</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> stopRow</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> columnFamily</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> columnName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> value        字段过滤条件值</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> trueForRow   true 返回整行</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">filterScan</span><span class="params">(</span></span><br><span class="line"><span class="params">            String namespace, String tableName, String startRow, String stopRow, String columnFamily, String columnName, String value, <span class="type">boolean</span> trueForRow)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">Table</span> <span class="variable">table</span> <span class="operator">=</span> HBaseConnectUtil.getConnection()</span><br><span class="line">                .getTable(TableName.valueOf(namespace, tableName));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 获得过滤器</span></span><br><span class="line">        <span class="type">FilterList</span> <span class="variable">filterList</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterList</span>();</span><br><span class="line">        <span class="keyword">if</span> (trueForRow) &#123;</span><br><span class="line">            <span class="comment">// 整行过滤器  SingleColumnValueFilter</span></span><br><span class="line">            <span class="type">SingleColumnValueFilter</span> <span class="variable">columnValueFilter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SingleColumnValueFilter</span>(</span><br><span class="line">                    Bytes.toBytes(columnFamily),</span><br><span class="line">                    Bytes.toBytes(columnName),</span><br><span class="line">                    CompareOperator.EQUAL,</span><br><span class="line">                    Bytes.toBytes(value)</span><br><span class="line">            );</span><br><span class="line">            filterList.addFilter(columnValueFilter);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 单列过滤器 ColumnValueFilter</span></span><br><span class="line">            <span class="type">ColumnValueFilter</span> <span class="variable">columnValueFilter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ColumnValueFilter</span>(</span><br><span class="line">                    Bytes.toBytes(columnFamily),</span><br><span class="line">                    Bytes.toBytes(columnName),</span><br><span class="line">                    CompareOperator.EQUAL,</span><br><span class="line">                    Bytes.toBytes(value)</span><br><span class="line">            );</span><br><span class="line">            filterList.addFilter(columnValueFilter);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">Scan</span> <span class="variable">scan</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scan</span>()</span><br><span class="line">                .withStartRow(Bytes.toBytes(startRow))</span><br><span class="line">                .withStopRow(Bytes.toBytes(stopRow))</span><br><span class="line">                <span class="comment">// 1. 设置过滤</span></span><br><span class="line">                .setFilter(filterList);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 扫描</span></span><br><span class="line">        <span class="type">ResultScanner</span> <span class="variable">scanner</span> <span class="operator">=</span> table.getScanner(scan);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (Result result : scanner) &#123;</span><br><span class="line">            <span class="keyword">for</span> (Cell cell : result.rawCells()) &#123;</span><br><span class="line">                System.out.print(<span class="keyword">new</span> <span class="title class_">String</span>(CellUtil.cloneRow(cell)) + <span class="string">&quot;\t&quot;</span>);</span><br><span class="line">                System.out.print(<span class="keyword">new</span> <span class="title class_">String</span>(CellUtil.cloneQualifier(cell)) + <span class="string">&quot;\t&quot;</span>);</span><br><span class="line">                System.out.print(<span class="keyword">new</span> <span class="title class_">String</span>(CellUtil.cloneValue(cell)) + <span class="string">&quot;\t&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        table.close();</span><br><span class="line">        HBaseConnectUtil.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 删除指定列</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> namespace</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> tableName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> rowKey</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> columnFamily</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> columnName</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">deleteColumn</span><span class="params">(String namespace, String tableName, String rowKey, String columnFamily, String columnName)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">Table</span> <span class="variable">table</span> <span class="operator">=</span> HBaseConnectUtil.getConnection().getTable(TableName.valueOf(namespace, tableName));</span><br><span class="line"></span><br><span class="line">        <span class="type">Delete</span> <span class="variable">delete</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Delete</span>(Bytes.toBytes(rowKey))</span><br><span class="line">                <span class="comment">// 删除一个版本； addColumns是删除所有版本</span></span><br><span class="line">                .addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 删除指定列</span></span><br><span class="line">        table.delete(delete);</span><br><span class="line"></span><br><span class="line">        table.close();</span><br><span class="line">        HBaseConnectUtil.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/HBase/" rel="tag"># HBase</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/12/es%E9%9B%86%E6%88%90%E5%8F%8AAPI%E6%93%8D%E4%BD%9C/" rel="prev" title="es集成及API操作">
+      <i class="fa fa-chevron-left"></i> es集成及API操作
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#HBase-%E6%A6%82%E5%BF%B5%E5%8F%8A%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">HBase 概念及架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HBase-%E6%A6%82%E5%BF%B5%EF%BC%9A"><span class="nav-number">1.1.</span> <span class="nav-text">HBase 概念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">逻辑结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E7%BB%B4%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8"><span class="nav-number">1.2.1.</span> <span class="nav-text">多维数据存储</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E8%A1%8C%E6%8B%86%E5%88%86"><span class="nav-number">1.2.2.</span> <span class="nav-text">按行拆分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E5%88%97%E6%8B%86%E5%88%86"><span class="nav-number">1.2.3.</span> <span class="nav-text">按列拆分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#json%E6%95%B0%E6%8D%AE"><span class="nav-number">1.2.4.</span> <span class="nav-text">json数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.</span> <span class="nav-text">物理存储结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.4.</span> <span class="nav-text">数据模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NameSpace"><span class="nav-number">1.4.1.</span> <span class="nav-text">NameSpace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Table"><span class="nav-number">1.4.2.</span> <span class="nav-text">Table</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Row"><span class="nav-number">1.4.3.</span> <span class="nav-text">Row</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Column"><span class="nav-number">1.4.4.</span> <span class="nav-text">Column</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Time-Stamp"><span class="nav-number">1.4.5.</span> <span class="nav-text">Time Stamp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cell"><span class="nav-number">1.4.6.</span> <span class="nav-text">Cell</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HBase%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84"><span class="nav-number">1.5.</span> <span class="nav-text">HBase基础架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Master"><span class="nav-number">1.5.1.</span> <span class="nav-text">Master</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Region-Server"><span class="nav-number">1.5.2.</span> <span class="nav-text">Region Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Zookeeper"><span class="nav-number">1.5.3.</span> <span class="nav-text">Zookeeper</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HDFS"><span class="nav-number">1.5.4.</span> <span class="nav-text">HDFS</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HBase%E7%9A%84Shell%E6%93%8D%E4%BD%9C"><span class="nav-number">2.</span> <span class="nav-text">HBase的Shell操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C"><span class="nav-number">2.1.</span> <span class="nav-text">基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8"><span class="nav-number">2.1.1.</span> <span class="nav-text">启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E5%85%A5HBase%E7%9A%84shell%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">2.1.2.</span> <span class="nav-text">进入HBase的shell客户端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%AE%E5%8A%A9%E5%91%BD%E4%BB%A4"><span class="nav-number">2.1.3.</span> <span class="nav-text">帮助命令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#namespace-%E5%91%BD%E4%BB%A4%E7%A9%BA%E9%97%B4"><span class="nav-number">2.2.</span> <span class="nav-text">namespace 命令空间</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAnamespace"><span class="nav-number">2.2.1.</span> <span class="nav-text">创建namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%89%80%E6%9C%89%E7%9A%84namespace"><span class="nav-number">2.2.2.</span> <span class="nav-text">查看所有的namespace</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDL"><span class="nav-number">2.3.</span> <span class="nav-text">DDL</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%A1%A8"><span class="nav-number">2.3.1.</span> <span class="nav-text">创建表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E5%91%BD%E4%BB%A4%E7%A9%BA%E9%97%B4%E5%92%8C%E7%89%88%E6%9C%AC%E6%95%B0"><span class="nav-number">2.3.1.1.</span> <span class="nav-text">指定命令空间和版本数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E6%8C%87%E5%AE%9A%E5%91%BD%E4%BB%A4%E7%A9%BA%E9%97%B4%E5%92%8C%E7%89%88%E6%9C%AC%E6%95%B0"><span class="nav-number">2.3.1.2.</span> <span class="nav-text">不指定命令空间和版本数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E8%A1%A8"><span class="nav-number">2.3.2.</span> <span class="nav-text">查看表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#list-%E6%9F%A5%E7%9C%8B%E6%89%80%E6%9C%89%E7%9A%84%E8%A1%A8"><span class="nav-number">2.3.2.1.</span> <span class="nav-text">list 查看所有的表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#desc-%E6%9F%A5%E7%9C%8B%E8%A1%A8%E7%BB%93%E6%9E%84"><span class="nav-number">2.3.2.2.</span> <span class="nav-text">desc 查看表结构</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E8%A1%A8%E7%BB%93%E6%9E%84"><span class="nav-number">2.3.3.</span> <span class="nav-text">修改表结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A2%9E%E5%8A%A0%E5%88%97%E6%97%8F%E5%92%8C%E4%BF%AE%E6%94%B9%E4%BF%A1%E6%81%AF%E9%83%BD%E4%BD%BF%E7%94%A8%E8%A6%86%E7%9B%96%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">2.3.3.1.</span> <span class="nav-text">增加列族和修改信息都使用覆盖的方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E5%88%97%E6%97%8F"><span class="nav-number">2.3.3.2.</span> <span class="nav-text">删除列族</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E8%A1%A8"><span class="nav-number">2.3.4.</span> <span class="nav-text">删除表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DML"><span class="nav-number">2.4.</span> <span class="nav-text">DML</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%99%E5%85%A5%E6%95%B0%E6%8D%AE"><span class="nav-number">2.4.1.</span> <span class="nav-text">写入数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE"><span class="nav-number">2.4.2.</span> <span class="nav-text">读取数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#get-%E8%AF%BB%E5%8F%96"><span class="nav-number">2.4.2.1.</span> <span class="nav-text">get 读取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#scan-%E6%89%AB%E6%8F%8F"><span class="nav-number">2.4.2.2.</span> <span class="nav-text">scan 扫描</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E6%95%B0%E6%8D%AE"><span class="nav-number">2.4.3.</span> <span class="nav-text">删除数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#delete"><span class="nav-number">2.4.3.1.</span> <span class="nav-text">delete</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#deleteall"><span class="nav-number">2.4.3.2.</span> <span class="nav-text">deleteall</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#API-%E6%93%8D%E4%BD%9C"><span class="nav-number">3.</span> <span class="nav-text">API 操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">3.1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%BE%97HBase%E8%BF%9E%E6%8E%A5"><span class="nav-number">3.2.</span> <span class="nav-text">获得HBase连接</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E7%B1%BB"><span class="nav-number">3.2.1.</span> <span class="nav-text">工具类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.2.2.</span> <span class="nav-text">默认配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#POM-%E6%96%87%E4%BB%B6"><span class="nav-number">3.2.3.</span> <span class="nav-text">POM 文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDL-1"><span class="nav-number">3.3.</span> <span class="nav-text">DDL</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4"><span class="nav-number">3.3.1.</span> <span class="nav-text">创建命名空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A4%E6%96%AD%E8%A1%A8%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8"><span class="nav-number">3.3.2.</span> <span class="nav-text">判断表是否存在</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%A1%A8-1"><span class="nav-number">3.3.3.</span> <span class="nav-text">创建表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E5%88%97%E6%97%8F%E7%9A%84%E7%89%88%E6%9C%AC%E6%95%B0"><span class="nav-number">3.3.4.</span> <span class="nav-text">修改列族的版本数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E8%A1%A8-1"><span class="nav-number">3.3.5.</span> <span class="nav-text">删除表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DML-1"><span class="nav-number">3.4.</span> <span class="nav-text">DML</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E5%AD%97%E6%AE%B5%E6%B7%BB%E5%8A%A0%E6%95%B0%E6%8D%AE%E5%88%B0cell%E4%B8%AD"><span class="nav-number">3.4.1.</span> <span class="nav-text">指定字段添加数据到cell中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E6%8C%87%E5%AE%9A%E5%AD%97%E6%AE%B5%E7%9A%84cell%E6%95%B0%E6%8D%AE"><span class="nav-number">3.4.2.</span> <span class="nav-text">查询指定字段的cell数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%AB%E6%8F%8F%E6%95%B0%E6%8D%AE-%E8%BF%94%E5%9B%9E%E5%A4%9A%E8%A1%8C%E6%95%B0%E6%8D%AE"><span class="nav-number">3.4.3.</span> <span class="nav-text">扫描数据(返回多行数据)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E5%AD%97%E6%AE%B5%E8%BF%87%E6%BB%A4%E6%89%AB%E6%8F%8F"><span class="nav-number">3.4.4.</span> <span class="nav-text">按字段过滤扫描</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E6%8C%87%E5%AE%9A%E5%88%97"><span class="nav-number">3.4.5.</span> <span class="nav-text">删除指定列</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDL-%E7%BB%BC%E5%90%88%E4%BB%A3%E7%A0%81"><span class="nav-number">3.5.</span> <span class="nav-text">DDL 综合代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DML-%E7%BB%BC%E5%90%88%E4%BB%A3%E7%A0%81"><span class="nav-number">3.6.</span> <span class="nav-text">DML 综合代码</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">arui zhong</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/aruizhong" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;aruizhong" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:aruizhong@163.com" title="E-Mail → mailto:aruizhong@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">arui zhong</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
